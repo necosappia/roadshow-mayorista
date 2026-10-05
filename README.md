@@ -2,6 +2,8 @@
 
 Página para clientes mayoristas: fotos, precios, stock y pedido con proforma en PDF.
 
+**Link para clientes:** https://roadshow-mayorista.necosappia.workers.dev
+
 Todo está en `index.html` (fotos y logo van adentro). No hay build: se edita y se sube.
 
 ## Qué tiene

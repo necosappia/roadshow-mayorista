@@ -1,7 +1,9 @@
 // Publicación en Cloudflare (solo archivos estáticos): publica index.html.
+// workers_dev: true deja prendida la dirección roadshow-mayorista.necosappia.workers.dev
 {
   "name": "roadshow-mayorista",
   "compatibility_date": "2026-10-01",
+  "workers_dev": true,
   "assets": {
     "directory": "."
   }
