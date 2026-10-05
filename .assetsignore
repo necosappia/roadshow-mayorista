@@ -1,0 +1,6 @@
+# Lo que NO se publica (solo va index.html)
+.git
+.gitignore
+.assetsignore
+wrangler.jsonc
+*.md

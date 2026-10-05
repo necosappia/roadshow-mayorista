@@ -1,0 +1,8 @@
+// Publicación en Cloudflare (solo archivos estáticos): publica index.html.
+{
+  "name": "roadshow-mayorista",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "."
+  }
+}
