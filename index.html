@@ -176,6 +176,8 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
 .cajab.ok{border-style:solid;border-color:var(--ok)}
 .cajab.ok span{color:var(--ok)}
 .bar .t em{display:block;font-style:normal;font-size:13px;font-weight:800;color:#FFB020;margin-top:2px}
+.edad{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.edad span{font-size:12px;font-weight:800;letter-spacing:.02em;padding:3px 9px;border-radius:999px;background:color-mix(in srgb,#FF7A1A 14%,var(--card));color:var(--ink);border:1px solid color-mix(in srgb,#FF7A1A 40%,transparent)}
 .zoom{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
 .zoom.show{display:flex}
 .zoom img{max-width:100%;max-height:100%;object-fit:contain;border-radius:12px;background:#fff}
@@ -273,6 +275,9 @@ const RS = [
   {id:"protecciones-rs",cat:"Protecciones", n:"Protecciones RS", col:"Negro",             dot:"#1F1F1F", p:37700,  tl:["S","M","L","XL"]},
 ];
 const CATS = ["Todos","Rollers","Cascos","Protecciones"];
+/* Para quién es cada producto */
+const EDADES = {"rsj-violeta":"todos","rsj-rosa":"todos","rsj-azul":"todos","rsk":"ninos"};
+const edadDe = x=>({todos:["Niños","Adolescentes","Adultos"],ninos:["Niños"]})[EDADES[x.id]]||["Adolescentes","Adultos"];
 /* Ficha que se abre con el botón INFO (el producto la elige con info:"...") */
 /* M4 PRO: misma ficha para los dos colores; el morado suma el chasis efecto espejo */
 const M4 = {
@@ -331,11 +336,13 @@ const INFO = {
       ["⚙️","GUÍA Y RUEDAS","Guía de aluminio casted fabricada en horno. Ruedas de 80 mm 85A en todos los talles, ABEC 9 con separadores de aluminio."],
     ],
     items:["Carcasa negra o imitación piedra en blanco y negro, con refuerzo de fibra de vidrio","Anclaje de 3 puntos con base de aluminio, reemplazable en el centro","Cierre de carraca superior con cierre anti apertura","Cierre milimétrico en el empeine con tornillería de estrella y guía para la tira dentada","Botín de primera calidad con superficie anti fricción, suela y puntera de neopreno","Cinta de transporte anti rotura Roadshow","Guía de aluminio casted con refuerzos interiores","Ruedas freeskate 85A con rodamientos ABEC 9 y separadores de aluminio","Cordones hasta el empeine","Shock absorber en el talón y plantilla de 3 mm","Incluye freno desmontado, llave Allen e instrucciones en español, inglés y chino","Talles 36/37 · 38/39 · 40/41 · 42/43 · 44/45"]},
-  rsj:{n:"RSJ", letras:["#6C3BD1","#E5408B","#5BA8E0"], fotos:["rsj-violeta","rsj-rosa","rsj-azul"],
+  rsj:{n:"RSJ", sub:"Para niños, adolescentes y adultos", letras:["#6C3BD1","#E5408B","#5BA8E0"], fotos:["rsj-violeta","rsj-rosa","rsj-azul"],
     bloques:[
+      ["✅","PROBADO POR EL EQUIPO","Nuestro equipo testeó su resistencia y su calidad."],
+      ["💪","RÍGIDO DE VERDAD","Aunque es extensible, no pierde la rigidez ni la estructura de los patines de una sola pieza. Está hecho con los materiales de los mejores modelos urbanos de adulto."],
       ["🛡️","SEGURO","Protectores laterales atornillados. El cierre del empeine tiene una guía que evita que la correa toque el suelo."],
       ["🎨","DIVERTIDO","Colores llamativos que combinan con distintos estilos y edades: rosa, violeta y azul."],
-      ["👟","CÓMODO","Compacto y con buenas prestaciones para chicos o adultos. Plantilla de calzado deportivo."],
+      ["👟","CÓMODO","Compacto y con buenas prestaciones para niños, adolescentes y adultos. Plantilla de calzado deportivo."],
       ["🔧","FÁCIL","El talle se cambia apretando un botón. Todas las partes se desmontan con un destornillador de estrella y una llave Allen."],
     ],
     items:["Carcasa ultra rígida","Extensible: 4 talles en uno","Talles 28/31 · 32/35 · 36/39","Botín gama alta de freeskate","Plantilla de 3 mm","Guía de aluminio resistente","Cordones con cierre de botón","Cierre de carraca con seguro y anti apertura","Cierre milimétrico en el empeine","Shock absorber en el talón","Ruedas freeskate 85A de perfil redondo","1 solo tornillo por rueda","La guía se mueve lateralmente","Rodamientos ABEC 9 con separador de aluminio","Pegatinas reflectantes en ambos lados","Freno y llave Allen incluidos"]},
@@ -381,7 +388,8 @@ function card(x){
       <div class="ph"><b>${esc(x.n)}</b><span>${esc(x.col)}</span></div>
     </button>
     <div class="body">
-      <div><h2 class="name">${esc(x.n)}</h2><p class="col"><span class="dot" style="--d:${x.dot}"></span>${esc(x.col)}</p></div>
+      <div><h2 class="name">${esc(x.n)}</h2><p class="col"><span class="dot" style="--d:${x.dot}"></span>${esc(x.col)}</p>
+        <div class="edad">${edadDe(x).map(e=>`<span>${e}</span>`).join("")}</div></div>
       ${x.info||VIDEOS.some(v=>v.m===x.id)?`<div class="extras">${x.info?`<button class="ibtn" data-info="${x.info}">ⓘ Info</button>`:""}${VIDEOS.filter(v=>v.m===x.id).map(v=>`<a class="vbtn" href="${ytLink(v)}" target="_blank" rel="noopener"><b>▶</b> ${esc(v.n||"Ver video")}</a>`).join("")}</div>`:""}
       ${x.p?`<div class="price">${fmt(x.p)}<small>Precio mayorista + IVA 21%</small></div>`:`<div class="price tbc">Precio a confirmar</div>`}
       ${m==="enc"&&(x.caja||x.fab)?`<div class="cajab${faltan(x)?" falta":enCaja(x)?" ok":""}">
