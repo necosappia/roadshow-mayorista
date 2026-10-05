@@ -74,7 +74,10 @@ button,input,select{font:inherit;color:inherit}
 .galeria figure{margin:0;position:relative;scroll-snap-align:start;border-radius:16px;overflow:hidden;aspect-ratio:3/5;background:#222;cursor:zoom-in}
 .galeria img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
 .galeria figure:hover img{transform:scale(1.05)}
-.galeria figcaption{position:absolute;left:0;right:0;bottom:0;padding:24px 12px 10px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:14px}
+.ggrupo{margin-bottom:18px;min-width:0}
+@media (min-width:900px){.gfila.doble{display:grid;grid-template-columns:1fr 1fr;gap:12px}.gfila.doble .galeria{grid-template-columns:repeat(2,1fr)}}
+.ggrupo h3{margin:0 0 10px;font-weight:900;font-stretch:75%;font-size:30px;line-height:1;display:flex;align-items:center;gap:10px}
+.ggrupo h3::before{content:"";width:6px;height:26px;border-radius:3px;background:var(--y)}
 @media (max-width:560px){.galeria{grid-auto-columns:72%}}
 @media (min-width:900px){.galeria{grid-auto-flow:row;grid-template-columns:repeat(4,1fr);overflow:visible}}
 /* videos */
@@ -226,7 +229,7 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
   <p class="kick"><span></span>NUESTRO EQUIPO<span></span></p>
   <h2 id="lt">PROBADOS AL <span class="y">LÍMITE</span></h2>
   <p class="lead">Antes de traerlos, los usamos en la calle: saltos, giros y kilómetros. Testeamos su resistencia y su calidad para que lleguen probados.</p>
-  <div class="galeria" id="galeria"></div>
+  <div id="galeria"></div>
 </div></section>
 
 <section class="videos" aria-labelledby="vt"><div class="wrap">
@@ -614,7 +617,12 @@ const FOTOS = {
    La tarjeta usa la foto de portada (va adentro del archivo) para no depender de nada externo. */
 $("#vids").innerHTML=VIDEOS.map(v=>`<a class="vid${v.m?" prodv":""}" href="${ytLink(v)}" target="_blank" rel="noopener" aria-label="${esc(v.n||"Video")}: ver en YouTube">
     <img src="${(v.m&&FOTOS[v.m])||PORTADA}" alt=""><span class="play">▶</span><span class="vtxt">${esc((v.n||"Video").toUpperCase())}<small>Ver en YouTube</small></span></a>`).join("");
-$("#galeria").innerHTML=PRUEBAS.map((f,i)=>`<figure data-g="${i}"><img src="${f.src}" alt="${esc(f.t)}" loading="lazy"><figcaption>${esc(f.t)}</figcaption></figure>`).join("");
+/* Fotos agrupadas por modelo, en este orden */
+/* Cada fila puede tener uno o dos modelos (en la compu van uno al lado del otro) */
+const GRUPOS = [[{n:"RSJ",m:["rsj"]}],[{n:"M4 PRO",m:["m4pro-morado","m4pro-negro"]}],[{n:"M3",m:["m3"]},{n:"RSK",m:["rsk"]}]];
+const grupoHTML=g=>{ const fs=PRUEBAS.map((f,i)=>({...f,i})).filter(f=>g.m.includes(f.m)); if(!fs.length) return "";
+  return `<div class="ggrupo"><h3>${esc(g.n)}</h3><div class="galeria">${fs.map(f=>`<figure data-g="${f.i}"><img src="${f.src}" alt="${esc(f.t)}" loading="lazy"></figure>`).join("")}</div></div>`; };
+$("#galeria").innerHTML=GRUPOS.map(fila=>{ const h=fila.map(grupoHTML).filter(Boolean); return h.length?`<div class="gfila${h.length>1?" doble":""}">${h.join("")}</div>`:""; }).join("");
 $("#galeria").addEventListener("click",e=>{ const f=e.target.closest("figure"); if(!f) return; const z=$("#zoom"); z.querySelector("img").src=PRUEBAS[+f.dataset.g].src; z.querySelector("img").alt=PRUEBAS[+f.dataset.g].t; z.classList.add("show"); });
 $("#logo").src=LOGO; $("#portada").src=PORTADA;
 render();
