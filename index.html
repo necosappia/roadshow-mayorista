@@ -163,6 +163,7 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
 .nota{margin:10px 0 0;font-weight:800;color:var(--mc)}
 @media (max-width:560px){.modo{font-size:14px}.cover{--h:78vw}}
 .prod.agotado .foto img{opacity:.45;filter:grayscale(.6)}
+.nost.elegir{background:color-mix(in srgb,#FF7A1A 8%,var(--paper))}
 .nost{margin-top:auto;background:var(--paper);border-radius:12px;padding:12px;color:var(--soft)}
 .nost b{display:block;color:var(--ink)}
 .nost .ir{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
@@ -390,7 +391,7 @@ const esc = s=>String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"
 const fmt = n=>"$ "+Math.round(n).toLocaleString("es-AR");
 const fmt2 = n=>"$ "+n.toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2});
 const RX = Object.fromEntries(RS.map(x=>[x.id,x]));
-let filtro = "Todos", modo = "ya";
+let filtro = "Todos", modo = null;   // null = catálogo: solo fotos, hasta que la persona elige cómo lo quiere
 const pedido = {};   // "modo|id|talle" -> cantidad
 const qOf = (m,id,t)=>pedido[m+"|"+id+"|"+t]||0;
 const dispOf = (m,x,t)=>m==="enc"?MAXENC:((x[m]||{})[t]||0);
@@ -409,7 +410,9 @@ const uTxt = n=>n===1?"1 unidad":n+" unidades";
 function card(x){
   const m=modo, ts=tallesDe(m,x), on=ts.some(t=>qOf(m,x.id,t)>0);
   const otros=Object.keys(MODOS).filter(k=>k!==m&&hayEn(k,x));
-  return `<article class="prod${on?" on":""}${ts.length?"":" agotado"}" data-id="${x.id}">
+  const pedir=!m?`<div class="nost elegir"><b>¿Cómo lo querés?</b>
+        <div class="ir">${otros.map(k=>`<button data-modo="${k}" style="--mc:${MODOS[k].c}">${MODOS[k].i} ${MODOS[k].n}</button>`).join("")}</div></div>`:"";
+  return `<article class="prod${on?" on":""}${m&&!ts.length?" agotado":""}" data-id="${x.id}">
     <button class="foto${FOTOS[x.id]?"":" sin"}" aria-label="Ver foto grande de ${esc(x.n)} ${esc(x.col)}">
       <img src="${FOTOS[x.id]||""}" alt="${esc(x.n)} ${esc(x.col)}" loading="lazy">
       <div class="ph"><b>${esc(x.n)}</b><span>${esc(x.col)}</span></div>
@@ -422,7 +425,7 @@ function card(x){
       ${m==="enc"&&(x.caja||x.fab)?`<div class="cajab${faltan(x)?" falta":enCaja(x)?" ok":""}">
         ${x.caja?`<b>📦 Caja de ${x.caja} pares del mismo talle</b><span>${!enCaja(x)?"Cada + suma una caja":faltan(x)?`${faltan(x)===1?"Falta 1":"Faltan "+faltan(x)} para cerrar las cajas`:`✓ ${enCaja(x)/x.caja===1?"1 caja":enCaja(x)/x.caja+" cajas"} · ${enCaja(x)} pares`}</span>`:""}
         ${x.fab?`<small>🏭 Se fabrica con un mínimo de ${x.fab} unidades, compartido entre todos los pedidos</small>`:""}</div>`:""}
-      ${ts.length?`<div><p class="tl">${m==="enc"?"TALLES PARA ENCARGAR":"TALLES DISPONIBLES"}</p>
+      ${!m?pedir:ts.length?`<div><p class="tl">${m==="enc"?"TALLES PARA ENCARGAR":"TALLES DISPONIBLES"}</p>
         ${ts.map(t=>{ const q=qOf(m,x.id,t), d=dispOf(m,x,t), st=paso(m,x);
           return `<div class="trow${q?" si":""}${q>=d?" lleno":""}" data-t="${esc(t)}"><b>${esc(t)}</b><span class="disp">${m==="enc"?(st>1&&q?(q/st===1?"1 caja":q/st+" cajas"):"A pedido"):q>=d?"Llevás todos":d===1?"1 disponible":d+" disponibles"}</span>
             <div class="step"><button data-a="-" aria-label="Restar talle ${esc(t)}" ${q?"":"disabled"}>−</button><output>${q}</output><button data-a="+" aria-label="Sumar ${st>1?"una caja de":""} talle ${esc(t)}" ${q+st>d?"disabled":""}>+</button></div></div>`; }).join("")}
@@ -433,8 +436,10 @@ function card(x){
 function render(){
   const cnt=k=>items().filter(i=>i.m===k).reduce((a,i)=>a+i.q,0);
   $("#modos").innerHTML=Object.entries(MODOS).map(([k,v])=>`<button class="modo" data-m="${k}" style="--mc:${v.c}" aria-pressed="${k===modo}"><span>${v.i} ${v.n}</span>${cnt(k)?`<em>${cnt(k)}</em>`:""}</button>`).join("");
-  $("#nota").textContent=MODOS[modo].nota; $("#nota").style.setProperty("--mc",MODOS[modo].c);
-  const vis=RS.filter(x=>modo!=="via"||hayEn("via",x)).sort((a,b)=>hayEn(modo,b)-hayEn(modo,a));   // primero lo que hay
+  $("#nota").textContent=modo?MODOS[modo].nota:"Mirá los modelos y tocá cómo lo querés para elegir talles y pedir.";
+  $("#nota").style.setProperty("--mc",modo?MODOS[modo].c:"#FF7A1A");
+  const vis=RS.filter(x=>modo!=="via"||hayEn("via",x));
+  if(modo) vis.sort((a,b)=>hayEn(modo,b)-hayEn(modo,a));   // primero lo que hay
   $("#cats").innerHTML = CATS.filter(c=>c==="Todos"||vis.some(x=>x.cat===c))
     .map(c=>`<button class="cat" data-c="${c}" aria-pressed="${c===filtro}">${c}</button>`).join("");
   const f=vis.filter(x=>filtro==="Todos"||x.cat===filtro);
@@ -450,7 +455,7 @@ function renderBar(){
   $("#barW").textContent=inc.length?"⚠️ Completá las cajas: "+inc.map(x=>`${x.n} ${x.col} (${faltan(x)===1?"falta 1":"faltan "+faltan(x)})`).join(", "):"";
 }
 
-$("#modos").addEventListener("click",e=>{ const b=e.target.closest(".modo"); if(!b) return; modo=b.dataset.m; render(); });
+$("#modos").addEventListener("click",e=>{ const b=e.target.closest(".modo"); if(!b) return; modo=modo===b.dataset.m?null:b.dataset.m; render(); });   // tocarlo de nuevo vuelve al catálogo
 $("#cats").addEventListener("click",e=>{ const b=e.target.closest(".cat"); if(!b) return; filtro=b.dataset.c; render(); });
 $("#list").addEventListener("click",e=>{
   const art=e.target.closest(".prod"); if(!art) return; const x=RX[art.dataset.id];
