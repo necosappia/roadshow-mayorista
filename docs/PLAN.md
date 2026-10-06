@@ -126,6 +126,7 @@ Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al prove
 - **Pedido en tránsito (llega 28/10):** compra de **88 pares** (RS600 31, M4 PRO negro 21, M4 PRO morado 20, RS300 12, RX6 blanco 4) como stock `CAMINO`. Total a costo de lista $ 15.399.100 — **confirmar fecha y monto real** (¿pedido del 17/09 por $ 17.015.100?).
 - **Paula Berenguer** (cliente sin usuario, Mayorista, exclusividad Neuquén - Río Negro) con la **proforma 00021** (27 pares, $ 7.947.703,50 con IVA) en estado **a confirmar**, que **reserva** sus 27 pares del pedido en tránsito. Libres: **61**, igual a lo que muestra la página. Confirmar estado y seña.
 - SQL: `docs/supabase/09_carga_llega_28_10.sql`.
+- **Fly Free (PISAPPCO SRL):** 153 pares del 20/04 al 27/06/2026, $ 21.373.680, como una sola venta. SQL: `docs/supabase/10_carga_ff_153_pares.sql`. Falta cargar sus **pagos** (sección 2) para ver el saldo de 7.678.590.
 
 ### Estado de la base (06/10)
 - Tablas: `admins`, `productos` (75), `clientes`, `operaciones`, `operacion_items`, `pagos`, `stock_movimientos`. Todas con RLS.
@@ -141,7 +142,7 @@ Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al prove
 ## 7. Pendientes
 
 **Datos que tiene que pasar Nico:**
-1. El detalle de los **153 pares** (modelos, talles y precios). Si no lo tiene, se carga como una venta total.
+1. ✅ **Cargado (06/10):** el detalle de los **153 pares** de Fly Free (`docs/datos/ff-153-pares.csv`) como **una sola venta** a PISAPPCO SRL (perfil Fly Free), $ 21.373.680, estado entregada. RX6D = Negro; RSK 28-32 = S y 32-35 = M; RSJ Mora = Violeta; año 2026. 8 pares sin cargo. No movió stock (falta cargar el primer pedido).
 2. El **aporte de capital** (~22M): monto, fecha y quiénes.
 3. El **pedido del 17/09 por 17.015.100**: ¿pagado o pendiente? ¿Los USD 4.256 fueron para ese pedido?
 4. **Neuquén 4.499.566,50:** ¿seña de la proforma 00021?
