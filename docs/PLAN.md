@@ -126,6 +126,7 @@ Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al prove
 - **Pedido en tránsito (llega 28/10):** compra de **88 pares** (RS600 31, M4 PRO negro 21, M4 PRO morado 20, RS300 12, RX6 blanco 4) como stock `CAMINO`. Total a costo de lista $ 15.399.100 — **confirmar fecha y monto real** (¿pedido del 17/09 por $ 17.015.100?).
 - **Paula Berenguer** (cliente sin usuario, Mayorista, exclusividad Neuquén - Río Negro) con la **proforma 00021** (27 pares, $ 7.947.703,50 con IVA) en estado **a confirmar**, que **reserva** sus 27 pares del pedido en tránsito. Libres: **61**, igual a lo que muestra la página. Confirmar estado y seña.
 - SQL: `docs/supabase/09_carga_llega_28_10.sql`.
+- **Paula, primer pedido (Depo BA):** proforma también numerada **00021** (17/09), 18 pares, $ 4.440.800 + IVA = **$ 5.373.368**, estado entregada, sin número en la base porque el 21 lo usa la del 28/10. PDF: `docs/datos/proforma-00021-depo-ba.pdf`. SQL: `docs/supabase/11_carga_paula_depo_ba.sql`. **Confirmar pago** (¿los $ 4.499.566,50 del 11/09?). Ojo: hay dos proformas con el mismo número.
 - **Fly Free (PISAPPCO SRL):** 153 pares del 20/04 al 27/06/2026, $ 21.373.680, como una sola venta. SQL: `docs/supabase/10_carga_ff_153_pares.sql`. Falta cargar sus **pagos** (sección 2) para ver el saldo de 7.678.590.
 
 ### Estado de la base (06/10)
