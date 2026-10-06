@@ -15,7 +15,7 @@ Leé primero **`docs/PLAN.md`**: ahí está todo lo que se decidió (cuenta corr
 - **Publicada en Vercel** → https://roadshow.universosobreruedas.com (y https://roadshow-mayorista.vercel.app). Cada push a `main` se publica solo.
 - También hay una copia en Cloudflare (`roadshow-mayorista.necosappia.workers.dev`, `wrangler.jsonc`). Nico va a borrarla; no la uses como referencia.
 - `admin/index.html`: **panel de administración** (`/admin`), mismo estilo Roadshow. Solo entra quien está en la tabla `admins` de Supabase. Solapas: Inicio · Clientes (aprobar y elegir lista) · Precios (costo, listas y margen) · Pedidos / Stock / Finanzas (próximamente). No lleva datos escritos: todo sale de Supabase.
-- **Versiones:** el panel va por **BETA 0.4** (constante `VERSION` y la etiqueta del encabezado). Subí el número en cada cambio que publiques (0.2, 0.3…).
+- **Versiones:** el panel va por **BETA 0.5** (constante `VERSION` y la etiqueta del encabezado). Subí el número en cada cambio que publiques (0.2, 0.3…).
 - `docs/datos/`: el Excel de movimientos, la lista de precios y la proforma 00021 tal como los pasó Nico.
 
 ## Lo que NO se publica
@@ -29,7 +29,7 @@ Leé primero **`docs/PLAN.md`**: ahí está todo lo que se decidió (cuenta corr
 | `MODOS` | las 3 solapas: `ya` ⚡ Entrega inmediata, `via` 🚚 Llega 28/10, `enc` 📦 Encargo |
 | `RS` | productos: `ya`/`via` stock por talle, `tl` talles, `caja` pares por caja (encargo, un solo talle por caja), `fab` mínimo de fabricación compartido, `info` ficha. **Sin precios**: no escribir precios en la página (quedan públicos en el código) |
 | `REF` | qué fila de `productos` de Supabase (`MODELO|COLOR`) le da el precio a cada producto de la página |
-| cuenta (`cargarCuenta`, `precio()`, `minimo()`) | Registrarse / Ingresar arriba. Los precios llegan de la función `precios_cliente()` de Supabase solo si el cliente está aprobado, según su **perfil**: **Mayorista** ve BA en ⚡ y China en 🚚/📦 (+ IVA), mínimo 6 pares por pedido salvo si todo es ⚡; **Emprendedor** ve China + 30 % (+ IVA), mínimo 3 pares; **Fly Free** ve FF **sin IVA**, sin mínimo. Cada producto muestra la venta sugerida con IVA y cuánto gana el cliente ($ y %). El admin aprueba clientes desde "Mi cuenta" o `/admin` |
+| cuenta (`cargarCuenta`, `precio()`, `minimo()`) | Registrarse / Ingresar arriba. Los precios llegan de la función `precios_cliente()` de Supabase solo si el cliente está aprobado, según su **perfil**: **Mayorista** ve BA en ⚡ y China en 🚚/📦 (+ IVA), mínimo 6 pares por pedido salvo si todo es ⚡; **Emprendedor** ve China + 30 % (+ IVA), mínimo 3 pares; **Fly Free** ve FF **sin IVA**, sin mínimo. Cada producto muestra la venta sugerida con IVA, cuánto gana el cliente ($ y %) y cuánto gana vendiendo en Mercado Libre (`ML_COMISION` = 25 % del precio de venta). "Mi cuenta" muestra su historial (pares y $ de sus ventas no canceladas). El admin aprueba clientes desde "Mi cuenta" o `/admin` |
 | `EDADES` | etiqueta Niños / Niños-Adolescentes-Adultos (el resto: Adolescentes · Adultos) |
 | `INFO` | fichas del botón Info |
 | `VIDEOS` | YouTube: se abre afuera (en la página no se puede incrustar) |
