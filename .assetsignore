@@ -4,3 +4,7 @@
 .assetsignore
 wrangler.jsonc
 *.md
+docs
+*.csv
+*.pdf
+.vercelignore

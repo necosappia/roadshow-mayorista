@@ -2,7 +2,7 @@
 
 Página para clientes mayoristas: fotos, precios, stock y pedido con proforma en PDF.
 
-**Link para clientes:** https://roadshow-mayorista.necosappia.workers.dev
+**Link para clientes:** https://roadshow.universosobreruedas.com (Vercel)
 
 Todo está en `index.html` (fotos y logo van adentro). No hay build: se edita y se sube.
 
@@ -20,4 +20,7 @@ Al principio del `<script>`:
 - `WA`: número de WhatsApp.
 
 ## Publicar
-Cloudflare (Workers & Pages) conectado a este repositorio publica solo cada vez que se sube un cambio a `main`.
+Vercel está conectado a este repositorio y publica solo cada vez que se sube un cambio a `main`. `docs/` (datos del negocio y el plan) no se publica.
+
+## Próximo paso
+Tablero financiero + pedidos con cuenta corriente en Supabase: ver `docs/PLAN.md`.

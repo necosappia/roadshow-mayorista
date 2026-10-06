@@ -1,0 +1,7 @@
+# Lo que Vercel NO publica: documentos, datos del negocio y configuración
+docs
+*.md
+*.csv
+*.pdf
+wrangler.jsonc
+.assetsignore
