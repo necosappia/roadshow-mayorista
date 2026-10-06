@@ -542,7 +542,7 @@ function precioHTML(x,m){
   if(e==="cargando") return `<div class="price lock">Cargando precio…</div>`;
   if(e!=="aprobado") return `<div class="price lock">⏳ Precio al aprobar tu cuenta</div>`;
   const pr=PRECIOS[x.id]; if(!pr) return `<div class="price tbc">Precio a confirmar</div>`;
-  const ff=cuenta.categoria==="ff", nota=ff?"Precio Fly Free (sin IVA)":"Precio "+perfilDe(cuenta.categoria).toLowerCase()+" + IVA 21%";
+  const ff=cuenta.categoria==="ff", nota=ff?"Precio Fly Free":"Precio "+perfilDe(cuenta.categoria).toLowerCase()+" + IVA 21%";
   const gana=v=>pr.pub&&v?`<span class="gana"><span>Venta sugerida <b>${fmt(pr.pubIva)}</b></span><span>Ganás <b>${fmt(pr.pub-v)}</b> por unidad <b>(${Math.round((pr.pub/v-1)*100)}%)</b></span></span>`:"";
   if(m) return `<div class="price">${fmt(pr[m])}<small>${nota}</small>${gana(pr[m])}</div>`;
   return pr.ya===pr.via?`<div class="price">${fmt(pr.via)}<small>${nota}</small>${gana(pr.via)}</div>`
@@ -650,7 +650,7 @@ function proformaPDF(datos){
   doc.text("CLIENTE",52,by+18); doc.text("CONDICIONES",52+bw+12,by+18);
   doc.setFontSize(12); doc.setTextColor(...INK); doc.text(doc.splitTextToSize(datos.cli||"-",bw-24)[0],52,by+42);
   doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(110); if(datos.zona) doc.text(datos.zona,52,by+60);
-  [["Envío",datos.env||"A coordinar"],["Pago",datos.pago],["Moneda","Pesos argentinos"],["Precios",conIVA()?perfilDe(cuenta.categoria)+" + IVA 21%":"Fly Free, sin IVA"]].forEach(([k,v],i)=>{
+  [["Envío",datos.env||"A coordinar"],["Pago",datos.pago],["Moneda","Pesos argentinos"],["Precios",conIVA()?perfilDe(cuenta.categoria)+" + IVA 21%":"Fly Free"]].forEach(([k,v],i)=>{
     const y=by+34+i*12; doc.setFont("helvetica","normal"); doc.setTextColor(110); doc.text(k,52+bw+12,y);
     doc.setFont("helvetica","bold"); doc.setTextColor(...INK); doc.text(v,52+bw+12+50,y); });
   // tabla
@@ -702,7 +702,7 @@ $("#wa").addEventListener("click",()=>{
   if(!ultimo) return; const r=totales();
   const txt=`🧾 PEDIDO ROADSHOW · Proforma N° ${ultimo.nro}\nCliente: ${ultimo.cli}${ultimo.zona?" ("+ultimo.zona+")":""}\nFecha: ${ultimo.fecha}\n\n`
     +r.its.map(i=>`• ${i.q} x ${i.x.n} ${i.x.col} ${i.t} (${MODOS[i.m].corto})`).join("\n")
-    +`\n\n${uTxt(r.u)}\nTotal: ${fmt2(r.total)}${r.conIva?" (IVA incluido)":" (sin IVA)"}${r.tbc?"\n+ productos con precio a confirmar":""}`;
+    +`\n\n${uTxt(r.u)}\nTotal: ${fmt2(r.total)}${r.conIva?" (IVA incluido)":""}${r.tbc?"\n+ productos con precio a confirmar":""}`;
   window.open(`https://wa.me/${WA}?text=${encodeURIComponent(txt)}`,"_blank","noopener");
 });
 
