@@ -110,6 +110,15 @@ Estado al 06/10/2026. Lo definió Nico en la sesión anterior; acá está todo l
 ### Maqueta aprobada como punto de partida
 Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al proveedor · Mercado Pago · Stock a costo), la cuenta corriente de Nico/FF con saldo, "Por cobrar" con estados (pendiente / a confirmar / vencido en rojo), "Clientes para aprobar", el resultado del mes y el stock por modelo (SR / en camino / costo). Pestañas: Resumen · Cuentas corrientes · Pedidos · Stock · Clientes · Precios · Cargar movimiento.
 
+### Estado de la base (06/10)
+- Tablas: `admins`, `productos` (75), `clientes`, `operaciones`, `operacion_items`, `pagos`, `stock_movimientos`. Todas con RLS.
+- **Anónimo:** no ve nada (probado). **Admin:** ve y cambia todo; es quien esté en `admins` (vacía: se agrega el usuario de Nico cuando haga su login, etapa 3). La función `privado.es_admin()` no se expone en la API.
+- **Cliente logueado:** puede registrarse (queda `pendiente`, sin categoría ni crédito) y leer solo sus datos, pedidos, ítems y pagos. **No** lee `productos` (tiene el costo y todas las listas): el catálogo con su lista y el pedido van por funciones (RPC) en la etapa 4.
+- `operaciones.tipo`: venta · compra · gasto · aporte_capital · pago_cc · ajuste. `estado` (solo órdenes): nueva · a_confirmar · confirmada · preparada · entregada · cancelada. Número de proforma: secuencia `proforma_seq`, arranca en **22**.
+- `stock_movimientos.lugar`: SR · FF · LP · **CAMINO** (pedido en tránsito, para "en camino" del tablero).
+- `productos.color` quedó con el **código de la lista** (B, N, R, G, M, T…) hasta unificar nombres con Nico. `caja` y `fab_minimo` salen de la página (MAX: mínimo 300). GF500C, RX6D y SOPORTE no tienen caja cargada. CELIGHTNM quedó con 29.000 tal cual la lista (pendiente revisar).
+- Quedó una tabla vacía `prueba_rls` (prueba del RLS automático). Borrarla: Supabase → Table Editor → `prueba_rls` → Delete table.
+
 **Ir por etapas:** primero la base y el tablero solo para Nico, con el historial cargado y verificado. Cuando confíe en los números, abrir el registro de clientes y los pedidos a cuenta corriente desde la página.
 
 ## 7. Pendientes
@@ -130,7 +139,7 @@ Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al prove
 
 ## 8. Orden de trabajo sugerido
 
-1. Crear las tablas y los permisos en Supabase (con el conector). Cargar `productos` desde `lista-precios.csv`.
+1. ✅ **Hecho (06/10):** tablas y permisos creados en Supabase y `productos` cargado desde `lista-precios.csv` (75 SKU). El SQL quedó en `docs/supabase/` (01 tablas y permisos · 02 productos · 03 funciones privadas). Ver "Estado de la base" abajo.
 2. Cargar el historial: capital, compras, la cuenta corriente de Nico/FF (sección 2), Neuquén, Tucumán y gastos. Verificar que el saldo de Nico dé **7.678.590**.
 3. Tablero `/admin` (login de Nico).
 4. Página: registro de clientes, precios por solapa y pedido → cuenta corriente.
