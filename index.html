@@ -321,7 +321,7 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
     <h3 id="ingT">Ingresar</h3>
     <form id="fIng" novalidate>
       <div class="box form">
-        <label>Mail<input id="iMail" required type="email" autocomplete="email"></label>
+        <label>Mail o usuario<input id="iMail" required type="text" autocomplete="username" autocapitalize="none" spellcheck="false"></label>
         <label>Contraseña<input id="iPass" required type="password" autocomplete="current-password"></label>
       </div>
       <button class="big bg-ac" id="iGo" type="submit">Ingresar</button>
@@ -689,6 +689,8 @@ $("#wa").addEventListener("click",()=>{
 });
 
 /* ===== cuenta: registrarse, ingresar, aprobar (Supabase) ===== */
+/* "admin" (sin @) = admin@universosobreruedas.com, la cuenta compartida de administración */
+const usuario=v=>{ v=v.trim().toLowerCase(); return v.includes("@")?v:v+"@universosobreruedas.com"; };
 const SB_URL="https://tqmqlvlbfkjekxwccsty.supabase.co", SB_KEY="sb_publishable_UdVpZD6Xem9M1wADl-X5JA_TyZkkx_q";
 let sb=null; try{ sb=window.supabase.createClient(SB_URL,SB_KEY); }catch(e){ sb=null; }
 const traducir=m=>({"Invalid login credentials":"Mail o contraseña incorrectos.",
@@ -730,7 +732,7 @@ $("#fIng").addEventListener("submit",async ev=>{
   ev.preventDefault(); const msg=$("#iMsg"); msg.innerHTML="";
   if(!sb){ msg.innerHTML=sinConexion(); return; }
   const b=$("#iGo"); b.disabled=true; b.textContent="Ingresando…";
-  try{ const {error}=await sb.auth.signInWithPassword({email:$("#iMail").value.trim(),password:$("#iPass").value});
+  try{ const {error}=await sb.auth.signInWithPassword({email:usuario($("#iMail").value),password:$("#iPass").value});
     if(error) throw error; $("#fIng").reset(); $("#ingS").classList.remove("show"); }
   catch(e){ msg.innerHTML=errHTML("No se pudo ingresar: "+traducir(e.message||String(e)),true);
     msg.querySelector("[data-reint]").onclick=()=>$("#fIng").requestSubmit(); }

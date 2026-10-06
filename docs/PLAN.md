@@ -142,7 +142,7 @@ Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al prove
 1. ✅ **Hecho (06/10):** tablas y permisos creados en Supabase y `productos` cargado desde `lista-precios.csv` (75 SKU). El SQL quedó en `docs/supabase/` (01 tablas y permisos · 02 productos · 03 funciones privadas). Ver "Estado de la base" abajo.
 2. Cargar el historial: capital, compras, la cuenta corriente de Nico/FF (sección 2), Neuquén, Tucumán y gastos. Verificar que el saldo de Nico dé **7.678.590**.
 3. Tablero `/admin` (login de Nico).
-   - ✅ **BETA 0.1 en la rama (06/10):** Inicio, Clientes (aprobar / lista), Precios (costo, FF, China, BA, P.P. y margen). Pedidos, Stock y Finanzas quedan como "Próximamente" (no se muestran números inventados). Nico es admin (`necosappia@gmail.com`).
+   - ✅ **BETA 0.1 en la rama (06/10):** Inicio, Clientes (aprobar / lista), Precios (costo, FF, China, BA, P.P. y margen). Pedidos, Stock y Finanzas quedan como "Próximamente" (no se muestran números inventados). Admins: `necosappia@gmail.com` y la cuenta compartida **`admin`** (`admin@universosobreruedas.com`, creada a mano con la contraseña confirmada; la contraseña la tiene Nico y **no** se guarda en el repo). En el login alcanza con escribir `admin`.
    - Nico quiere traer ideas del sistema de Fly Free (`fly-free-sistema`): leerlo **solo para consultar**, nunca modificarlo.
 4. Página: registro de clientes, precios por solapa y pedido → cuenta corriente.
    - ✅ **Hecho en la rama (06/10), falta publicar:** Registrarse / Ingresar arriba, precios solo con cuenta aprobada (BA en ⚡, China en 🚚/📦, FF para Fly Free sin sumar IVA) desde `mis_precios()`, y el admin aprueba clientes desde "Mi cuenta". Los precios ya no están escritos en `index.html`.
