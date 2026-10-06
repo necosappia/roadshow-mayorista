@@ -485,10 +485,12 @@ function items(){
 let cuenta = {estado:"fuera"};   // fuera | cargando | pendiente | rechazado | aprobado | error
 let PRECIOS = {};                // id -> {ya,via,enc}
 const verPrecios = ()=>cuenta.estado==="aprobado";
+const conIVA = ()=>cuenta.categoria!=="ff";
 const precio = (x,m)=>verPrecios()&&PRECIOS[x.id]?PRECIOS[x.id][m||"via"]||0:0;
 function totales(){
   const its=items().map(i=>({...i,p:precio(i.x,i.m)})), sub=its.reduce((a,i)=>a+i.q*i.p,0);
-  return {its,u:its.reduce((a,i)=>a+i.q,0),sub,iva:sub*IVA,total:sub*(1+IVA),tbc:its.some(i=>!i.p)};
+  const t=conIVA()?IVA:0;   // Fly Free: en sus pedidos no se suma el IVA
+  return {its,u:its.reduce((a,i)=>a+i.q,0),sub,iva:sub*t,total:sub*(1+t),tbc:its.some(i=>!i.p),conIva:t>0};
 }
 const uTxt = n=>n===1?"1 unidad":n+" unidades";
 
@@ -525,7 +527,7 @@ function precioHTML(x,m){
   if(e==="cargando") return `<div class="price lock">Cargando precio…</div>`;
   if(e!=="aprobado") return `<div class="price lock">⏳ Precio al aprobar tu cuenta</div>`;
   const pr=PRECIOS[x.id]; if(!pr) return `<div class="price tbc">Precio a confirmar</div>`;
-  const ff=cuenta.categoria==="ff", nota=ff?"Precio Fly Free + IVA 21%":"Precio mayorista + IVA 21%";
+  const ff=cuenta.categoria==="ff", nota=ff?"Precio Fly Free (sin IVA)":"Precio mayorista + IVA 21%";
   if(m) return `<div class="price">${fmt(pr[m])}<small>${nota}</small></div>`;
   return pr.ya===pr.via?`<div class="price">${fmt(pr.via)}<small>${nota}</small></div>`
     :`<div class="price">${fmt(pr.via)}<small>🚚 Llega 28/10 y 📦 Encargo · ${nota}</small><span class="otro">⚡ Entrega inmediata: ${fmt(pr.ya)}</span></div>`;
@@ -547,7 +549,7 @@ function renderBar(){
   const r=totales();
   const inc=incompletas(), e=cuenta.estado;
   $("#barT").classList.toggle("chico",!verPrecios());
-  if(verPrecios()){ $("#barQ").textContent=uTxt(r.u)+(r.sub?" · + IVA":""); $("#barT").textContent=fmt(r.sub);
+  if(verPrecios()){ $("#barQ").textContent=uTxt(r.u)+(r.sub&&r.conIva?" · + IVA":""); $("#barT").textContent=fmt(r.sub);
     $("#go").textContent="📄 Hacer pedido"; $("#go").disabled=!r.u||inc.length>0; }
   else { $("#barQ").textContent=uTxt(r.u); $("#barT").textContent=e==="pendiente"?"Cuenta en aprobación":"Precios para clientes";
     $("#go").textContent=e==="pendiente"?"⏳ Esperando":e==="rechazado"?"No aprobada":"Registrarse";
@@ -594,7 +596,7 @@ function abrir(){
   $("#resumen").innerHTML=r.its.map(i=>`<div class="li"><span><span class="q">${i.q}</span> ${esc(i.x.n)} ${esc(i.x.col)} · ${esc(i.t)} <span class="mtag" style="--mc:${MODOS[i.m].c}">${MODOS[i.m].i} ${MODOS[i.m].corto}</span></span><span>${i.p?fmt(i.q*i.p):"A confirmar"}</span></div>`).join("")
     +`<div style="margin-top:8px"><div class="tot"><span>Total de unidades</span><b>${r.u}</b></div>
       <div class="tot"><span>Subtotal</span><span>${fmt2(r.sub)}</span></div>
-      <div class="tot"><span>IVA 21%</span><span>${fmt2(r.iva)}</span></div>
+      ${r.conIva?`<div class="tot"><span>IVA 21%</span><span>${fmt2(r.iva)}</span></div>`:""}
       <div class="tot g"><span>TOTAL</span><span>${fmt2(r.total)}</span></div>
       ${r.tbc?`<p class="msg">Hay productos con precio a confirmar: no están sumados en el total.</p>`:""}</div>`;
   if(cuenta.cliente){ if(!$("#fCli").value) $("#fCli").value=cuenta.cliente.razon_social||""; if(!$("#fZona").value) $("#fZona").value=cuenta.cliente.zona||""; }
@@ -630,7 +632,7 @@ function proformaPDF(datos){
   doc.text("CLIENTE",52,by+18); doc.text("CONDICIONES",52+bw+12,by+18);
   doc.setFontSize(12); doc.setTextColor(...INK); doc.text(doc.splitTextToSize(datos.cli||"-",bw-24)[0],52,by+42);
   doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(110); if(datos.zona) doc.text(datos.zona,52,by+60);
-  [["Envío",datos.env||"A coordinar"],["Pago",datos.pago],["Moneda","Pesos argentinos"],["Precios",(cuenta.categoria==="ff"?"Fly Free":"Mayoristas")+" + IVA 21%"]].forEach(([k,v],i)=>{
+  [["Envío",datos.env||"A coordinar"],["Pago",datos.pago],["Moneda","Pesos argentinos"],["Precios",conIVA()?"Mayoristas + IVA 21%":"Fly Free, sin IVA"]].forEach(([k,v],i)=>{
     const y=by+34+i*12; doc.setFont("helvetica","normal"); doc.setTextColor(110); doc.text(k,52+bw+12,y);
     doc.setFont("helvetica","bold"); doc.setTextColor(...INK); doc.text(v,52+bw+12+50,y); });
   // tabla
@@ -646,10 +648,10 @@ function proformaPDF(datos){
   // totales
   let y=doc.lastAutoTable.finalY+26; if(y>H-190){ doc.addPage(); y=60; }
   const lx=W-230, rx=W-50;
-  [["Total de unidades",String(r.u)],["Subtotal",fmt2(r.sub)],["IVA 21%",fmt2(r.iva)]].forEach(([k,v],i)=>{
+  [["Total de unidades",String(r.u)],["Subtotal",fmt2(r.sub)],...(r.conIva?[["IVA 21%",fmt2(r.iva)]]:[])].forEach(([k,v],i)=>{
     doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(110); doc.text(k,lx,y+i*18);
     doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...INK); doc.text(v,rx,y+i*18,{align:"right"}); });
-  y+=42; doc.setFillColor(...RED); doc.roundedRect(lx-10,y,W-40-(lx-10),34,6,6,"F");
+  y+=r.conIva?42:24; doc.setFillColor(...RED); doc.roundedRect(lx-10,y,W-40-(lx-10),34,6,6,"F");
   doc.setTextColor(255); doc.setFontSize(10); doc.text("TOTAL",lx,y+21); doc.setFontSize(15); doc.text(fmt2(r.total),rx,y+22,{align:"right"});
   if(r.tbc){ doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(...RED); doc.text(["Hay productos con precio a confirmar:","no están sumados en el total."],W-40,y+50,{align:"right"}); }
   // pie
@@ -682,7 +684,7 @@ $("#wa").addEventListener("click",()=>{
   if(!ultimo) return; const r=totales();
   const txt=`🧾 PEDIDO ROADSHOW · Proforma N° ${ultimo.nro}\nCliente: ${ultimo.cli}${ultimo.zona?" ("+ultimo.zona+")":""}\nFecha: ${ultimo.fecha}\n\n`
     +r.its.map(i=>`• ${i.q} x ${i.x.n} ${i.x.col} ${i.t} (${MODOS[i.m].corto})`).join("\n")
-    +`\n\n${uTxt(r.u)}\nTotal: ${fmt2(r.total)} (IVA incluido)${r.tbc?"\n+ productos con precio a confirmar":""}`;
+    +`\n\n${uTxt(r.u)}\nTotal: ${fmt2(r.total)}${r.conIva?" (IVA incluido)":" (sin IVA)"}${r.tbc?"\n+ productos con precio a confirmar":""}`;
   window.open(`https://wa.me/${WA}?text=${encodeURIComponent(txt)}`,"_blank","noopener");
 });
 
