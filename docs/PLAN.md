@@ -143,3 +143,5 @@ Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al prove
 2. Cargar el historial: capital, compras, la cuenta corriente de Nico/FF (sección 2), Neuquén, Tucumán y gastos. Verificar que el saldo de Nico dé **7.678.590**.
 3. Tablero `/admin` (login de Nico).
 4. Página: registro de clientes, precios por solapa y pedido → cuenta corriente.
+   - ✅ **Hecho en la rama (06/10), falta publicar:** Registrarse / Ingresar arriba, precios solo con cuenta aprobada (BA en ⚡, China en 🚚/📦, FF para Fly Free) desde `mis_precios()`, y el admin aprueba clientes desde "Mi cuenta". Los precios ya no están escritos en `index.html`.
+   - Falta: el pedido como orden en la base (hoy sigue siendo proforma PDF en el navegador), "olvidé mi contraseña", y volver a prender la confirmación por mail.

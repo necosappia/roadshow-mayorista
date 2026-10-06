@@ -25,7 +25,9 @@ Leé primero **`docs/PLAN.md`**: ahí está todo lo que se decidió (cuenta corr
 | Constante | Qué es |
 |---|---|
 | `MODOS` | las 3 solapas: `ya` ⚡ Entrega inmediata, `via` 🚚 Llega 28/10, `enc` 📦 Encargo |
-| `RS` | productos: `p` precio sin IVA, `ya`/`via` stock por talle, `tl` talles, `caja` pares por caja (encargo, un solo talle por caja), `fab` mínimo de fabricación compartido, `info` ficha |
+| `RS` | productos: `ya`/`via` stock por talle, `tl` talles, `caja` pares por caja (encargo, un solo talle por caja), `fab` mínimo de fabricación compartido, `info` ficha. **Sin precios**: no escribir precios en la página (quedan públicos en el código) |
+| `REF` | qué fila de `productos` de Supabase (`MODELO|COLOR`) le da el precio a cada producto de la página |
+| cuenta (`cargarCuenta`, `precio()`) | Registrarse / Ingresar arriba. Los precios llegan de la función `mis_precios()` de Supabase solo si el cliente está aprobado: Mayorista ve BA en ⚡ y China en 🚚/📦; Fly Free ve FF. El admin aprueba clientes desde "Mi cuenta" |
 | `EDADES` | etiqueta Niños / Niños-Adolescentes-Adultos (el resto: Adolescentes · Adultos) |
 | `INFO` | fichas del botón Info |
 | `VIDEOS` | YouTube: se abre afuera (en la página no se puede incrustar) |
@@ -33,7 +35,9 @@ Leé primero **`docs/PLAN.md`**: ahí está todo lo que se decidió (cuenta corr
 | `FOTOS`, `PORTADA`, `LOGO` | imágenes en base64 (webp 900px) |
 | `WA` | WhatsApp de Nico — **todavía vacío, pedírselo** |
 
-La página arranca **sin solapa elegida** (catálogo con fotos). Los talles aparecen al tocar una solapa.
+La página arranca **sin solapa elegida** (catálogo con fotos). Los talles aparecen al tocar una solapa. Sin cuenta aprobada no se ven precios.
+
+SQL de la base en `docs/supabase/` (se aplica con el conector de Supabase).
 
 ## Antes de subir un cambio
 
