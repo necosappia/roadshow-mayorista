@@ -213,6 +213,8 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
 .aviso button{border:0;background:#111;color:#fff;border-radius:8px;padding:6px 10px;font-weight:800;cursor:pointer;margin-left:6px}
 .price.lock{font-size:20px;color:var(--soft)}
 .price.lock small button{border:0;background:none;padding:0;color:var(--rs);font-weight:800;text-decoration:underline;cursor:pointer;font-size:13px}
+.price .gana{display:block;font-size:14px;font-weight:700;font-stretch:100%;color:var(--ink);margin-top:8px;background:color-mix(in srgb,var(--ok) 12%,var(--card));border:1px solid color-mix(in srgb,var(--ok) 45%,transparent);border-radius:10px;padding:7px 10px;line-height:1.35}
+.price .gana b{color:var(--ok)}
 .price .otro{display:block;font-size:14px;font-weight:700;font-stretch:100%;color:var(--soft);margin-top:6px}
 .err{background:#FDECEC;color:#C62828;border:1px solid #F5B5B5;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px;margin-top:10px}
 .err button{border:0;background:#C62828;color:#fff;border-radius:8px;padding:6px 10px;font-weight:800;cursor:pointer;margin-left:6px}
@@ -486,6 +488,15 @@ let cuenta = {estado:"fuera"};   // fuera | cargando | pendiente | rechazado | a
 let PRECIOS = {};                // id -> {ya,via,enc}
 const verPrecios = ()=>cuenta.estado==="aprobado";
 const conIVA = ()=>cuenta.categoria!=="ff";
+const PERFIL = {mayorista:"Mayorista", emprendedor:"Emprendedor", ff:"Fly Free"};
+const perfilDe = k=>PERFIL[k]||"Mayorista";
+/* Mínimo de pares por pedido según el perfil. Mayorista: 6, salvo si todo es ⚡ Entrega inmediata (depósito BA). Emprendedor: 3. */
+function minimo(its){
+  if(cuenta.admin) return 0;   // el admin arma proformas para cualquiera, sin mínimo
+  if(cuenta.categoria==="emprendedor") return 3;
+  if(cuenta.categoria==="mayorista"&&its.some(i=>i.m!=="ya")) return 6;
+  return 0;
+}
 const precio = (x,m)=>verPrecios()&&PRECIOS[x.id]?PRECIOS[x.id][m||"via"]||0:0;
 function totales(){
   const its=items().map(i=>({...i,p:precio(i.x,i.m)})), sub=its.reduce((a,i)=>a+i.q*i.p,0);
@@ -527,10 +538,11 @@ function precioHTML(x,m){
   if(e==="cargando") return `<div class="price lock">Cargando precio…</div>`;
   if(e!=="aprobado") return `<div class="price lock">⏳ Precio al aprobar tu cuenta</div>`;
   const pr=PRECIOS[x.id]; if(!pr) return `<div class="price tbc">Precio a confirmar</div>`;
-  const ff=cuenta.categoria==="ff", nota=ff?"Precio Fly Free (sin IVA)":"Precio mayorista + IVA 21%";
-  if(m) return `<div class="price">${fmt(pr[m])}<small>${nota}</small></div>`;
-  return pr.ya===pr.via?`<div class="price">${fmt(pr.via)}<small>${nota}</small></div>`
-    :`<div class="price">${fmt(pr.via)}<small>🚚 Llega 28/10 y 📦 Encargo · ${nota}</small><span class="otro">⚡ Entrega inmediata: ${fmt(pr.ya)}</span></div>`;
+  const ff=cuenta.categoria==="ff", nota=ff?"Precio Fly Free (sin IVA)":"Precio "+perfilDe(cuenta.categoria).toLowerCase()+" + IVA 21%";
+  const gana=v=>pr.pub&&v?`<span class="gana">Venta sugerida <b>${fmt(pr.pubIva)}</b> con IVA · ganás <b>${fmt(pr.pub-v)}</b> por unidad (${Math.round((pr.pub/v-1)*100)}%)</span>`:"";
+  if(m) return `<div class="price">${fmt(pr[m])}<small>${nota}</small>${gana(pr[m])}</div>`;
+  return pr.ya===pr.via?`<div class="price">${fmt(pr.via)}<small>${nota}</small>${gana(pr.via)}</div>`
+    :`<div class="price">${fmt(pr.via)}<small>🚚 Llega 28/10 y 📦 Encargo · ${nota}</small><span class="otro">⚡ Entrega inmediata: ${fmt(pr.ya)}</span>${gana(pr.via)}</div>`;
 }
 function render(){
   const cnt=k=>items().filter(i=>i.m===k).reduce((a,i)=>a+i.q,0);
@@ -550,11 +562,13 @@ function renderBar(){
   const inc=incompletas(), e=cuenta.estado;
   $("#barT").classList.toggle("chico",!verPrecios());
   if(verPrecios()){ $("#barQ").textContent=uTxt(r.u)+(r.sub&&r.conIva?" · + IVA":""); $("#barT").textContent=fmt(r.sub);
-    $("#go").textContent="📄 Hacer pedido"; $("#go").disabled=!r.u||inc.length>0; }
+    const mn=minimo(r.its), falta=r.u&&r.u<mn;
+    $("#go").textContent="📄 Hacer pedido"; $("#go").disabled=!r.u||inc.length>0||falta;
+    if(falta&&!inc.length) $("#barW").textContent=`⚠️ Pedido mínimo: ${mn} pares (${perfilDe(cuenta.categoria)})${cuenta.categoria==="mayorista"?" · ⚡ Entrega inmediata sin mínimo":""}`; }
   else { $("#barQ").textContent=uTxt(r.u); $("#barT").textContent=e==="pendiente"?"Cuenta en aprobación":"Precios para clientes";
     $("#go").textContent=e==="pendiente"?"⏳ Esperando":e==="rechazado"?"No aprobada":"Registrarse";
     $("#go").disabled=e==="pendiente"||e==="rechazado"||e==="cargando"; }
-  $("#barW").textContent=inc.length?"⚠️ Completá las cajas: "+inc.map(x=>`${x.n} ${x.col} (${faltan(x)===1?"falta 1":"faltan "+faltan(x)})`).join(", "):"";
+  if(inc.length||!verPrecios()||!(r.u&&r.u<minimo(r.its))) $("#barW").textContent=inc.length?"⚠️ Completá las cajas: "+inc.map(x=>`${x.n} ${x.col} (${faltan(x)===1?"falta 1":"faltan "+faltan(x)})`).join(", "):"";
 }
 
 $("#modos").addEventListener("click",e=>{ const b=e.target.closest(".modo"); if(!b) return; modo=modo===b.dataset.m?null:b.dataset.m; render(); });   // tocarlo de nuevo vuelve al catálogo
@@ -632,13 +646,13 @@ function proformaPDF(datos){
   doc.text("CLIENTE",52,by+18); doc.text("CONDICIONES",52+bw+12,by+18);
   doc.setFontSize(12); doc.setTextColor(...INK); doc.text(doc.splitTextToSize(datos.cli||"-",bw-24)[0],52,by+42);
   doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(110); if(datos.zona) doc.text(datos.zona,52,by+60);
-  [["Envío",datos.env||"A coordinar"],["Pago",datos.pago],["Moneda","Pesos argentinos"],["Precios",conIVA()?"Mayoristas + IVA 21%":"Fly Free, sin IVA"]].forEach(([k,v],i)=>{
+  [["Envío",datos.env||"A coordinar"],["Pago",datos.pago],["Moneda","Pesos argentinos"],["Precios",conIVA()?perfilDe(cuenta.categoria)+" + IVA 21%":"Fly Free, sin IVA"]].forEach(([k,v],i)=>{
     const y=by+34+i*12; doc.setFont("helvetica","normal"); doc.setTextColor(110); doc.text(k,52+bw+12,y);
     doc.setFont("helvetica","bold"); doc.setTextColor(...INK); doc.text(v,52+bw+12+50,y); });
   // tabla
   const body=r.its.map(i=>[i.x.n,i.x.col,i.t,MODOS[i.m].corto,String(i.q),i.p?fmt2(i.p):"A confirmar",i.p?fmt2(i.q*i.p):"-"]);
   doc.autoTable({startY:by+bh+24,margin:{left:40,right:40},theme:"plain",
-    head:[["MODELO","COLOR","TALLE","ENTREGA","CANT.",cuenta.categoria==="ff"?"P. FLY FREE":"P. MAYORISTA","TOTAL"]],body,
+    head:[["MODELO","COLOR","TALLE","ENTREGA","CANT.","P. "+perfilDe(cuenta.categoria).toUpperCase(),"TOTAL"]],body,
     styles:{fontSize:8.5,cellPadding:{top:5,bottom:5,left:6,right:6},textColor:INK},
     headStyles:{fillColor:INK,textColor:255,fontStyle:"bold",fontSize:8},
     alternateRowStyles:{fillColor:[245,245,245]},
@@ -751,17 +765,18 @@ async function cargarCuenta(user){
     const [cli,adm,pr]=await Promise.all([
       sb.from("clientes").select("*").eq("user_id",user.id).maybeSingle(),
       sb.from("admins").select("user_id").eq("user_id",user.id),
-      sb.rpc("mis_precios")]);
+      sb.rpc("precios_cliente")]);
     const err=cli.error||adm.error||pr.error; if(err) throw err;
     const admin=adm.data.length>0, c=cli.data;
     const lista={}; (pr.data||[]).forEach(r=>{ (lista[r.modelo+"|"+r.color]=lista[r.modelo+"|"+r.color]||[]).push(r); });
     PRECIOS={}; for(const [id,ref] of Object.entries(REF)){ const rs=lista[ref]; if(!rs||!rs.length) continue;
       // un precio por producto: el que tiene la mayoría de los talles
-      const k=r=>[r.ya,r.via,r.enc].join("|"), cuenta_={}; rs.forEach(r=>cuenta_[k(r)]=(cuenta_[k(r)]||0)+1);
+      const k=r=>[r.ya,r.via,r.enc,r.publico??"",r.publico_iva??""].join("|"), cuenta_={}; rs.forEach(r=>cuenta_[k(r)]=(cuenta_[k(r)]||0)+1);
       const g=Object.entries(cuenta_).sort((a,b)=>b[1]-a[1])[0][0].split("|").map(Number);
-      PRECIOS[id]={ya:g[0],via:g[1],enc:g[2]}; }
+      PRECIOS[id]={ya:g[0],via:g[1],enc:g[2],pub:g[3]||0,pubIva:g[4]||0}; }
     const estado=Object.keys(PRECIOS).length?"aprobado":c?c.estado==="rechazado"?"rechazado":c.estado==="aprobado"?"aprobado":"pendiente":admin?"aprobado":"pendiente";
-    cuenta={estado,user,admin,cliente:c,categoria:c&&c.estado==="aprobado"?c.categoria:"mayorista"};
+    const perfil=(pr.data||[])[0]?.perfil;
+    cuenta={estado,user,admin,cliente:c,categoria:perfil||(c&&c.estado==="aprobado"?c.categoria:"mayorista")};
   }catch(e){ PRECIOS={}; cuenta={estado:"error",user,error:traducir(e.message||String(e))}; }
   pintarTodo();
   if(cuenta.admin) cargarClientes();
@@ -785,7 +800,7 @@ function pintarCuenta(){
   $("#ctaB").innerHTML=`<div class="box"><div class="li"><span>Mail</span><b>${esc(cuenta.user?.email)}</b></div>
     ${c?`<div class="li"><span>Comercio</span><b>${esc(c.razon_social)}</b></div>
     <div class="li"><span>Estado</span><span class="pill ${esc(c.estado)}">${c.estado==="aprobado"?"Aprobada":c.estado==="rechazado"?"No aprobada":"Pendiente de aprobación"}</span></div>
-    ${c.estado==="aprobado"?`<div class="li"><span>Lista de precios</span><b>${c.categoria==="ff"?"Fly Free":"Mayorista"}</b></div>`:""}`:""}
+    ${c.estado==="aprobado"?`<div class="li"><span>Lista de precios</span><b>${perfilDe(c.categoria)}</b></div>`:""}`:""}
     ${cuenta.admin?`<div class="li"><span>Rol</span><b>Administrador</b></div>`:""}</div>
     ${e==="error"?errHTML("No se pudieron cargar tus datos: "+cuenta.error,true):""}`;
   const r=$("#ctaB").querySelector("[data-reint]"); if(r) r.onclick=()=>cargarCuenta(cuenta.user);
@@ -802,9 +817,9 @@ function pintarClientes(){
   const l=cuenta.clis, box=$("#clis"); if(!box) return;
   const orden={pendiente:0,aprobado:1,rechazado:2};
   box.innerHTML=!l.length?"Todavía no se registró nadie.":[...l].sort((a,b)=>orden[a.estado]-orden[b.estado]).map(c=>`<div class="cli">
-    <div><b>${esc(c.razon_social)}</b> <span class="pill ${esc(c.estado)}">${esc(c.estado)}${c.estado==="aprobado"?" · "+(c.categoria==="ff"?"Fly Free":"Mayorista"):""}</span></div>
+    <div><b>${esc(c.razon_social)}</b> <span class="pill ${esc(c.estado)}">${esc(c.estado)}${c.estado==="aprobado"?" · "+perfilDe(c.categoria):""}</span></div>
     <span style="color:var(--soft);font-size:14px">${esc([c.email,c.cuit,c.telefono,c.zona,c.direccion].filter(Boolean).join(" · "))}</span>
-    <div class="acts"><select data-cat="${c.id}" aria-label="Lista de precios"><option value="mayorista">Mayorista</option><option value="ff"${c.categoria==="ff"?" selected":""}>Fly Free</option></select>
+    <div class="acts"><select data-cat="${c.id}" aria-label="Lista de precios">${Object.entries(PERFIL).map(([k,v])=>`<option value="${k}"${(c.categoria||"mayorista")===k?" selected":""}>${v}</option>`).join("")}</select>
       <button type="button" data-ap="${c.id}">${c.estado==="aprobado"?"Guardar lista":"Aprobar"}</button>${c.estado!=="rechazado"?`<button type="button" class="no" data-re="${c.id}">Rechazar</button>`:""}</div>
     <div data-m="${c.id}"></div></div>`).join("");
   const guardar=async(id,cambios,b)=>{ b.disabled=true; const m=box.querySelector(`[data-m="${id}"]`); m.innerHTML="";

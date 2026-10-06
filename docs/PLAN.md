@@ -55,6 +55,15 @@ Estado al 06/10/2026. Lo definió Nico en la sesión anterior; acá está todo l
 - **Revisar en la lista:** CELIGHTNM tiene costo 29.000 y precio 37.700 (igual que las protecciones), mientras los otros talles del casco tienen 27.000 y 35.100. ¿Error de copiado?
 - **Colores, distintos en la lista y en la página:** RS600 "B" (página: Camuflado), M3 "G" (página: Blanco), RSJ PRO "M" (página: Violeta), RSK "T". Unificar con Nico.
 
+### Perfiles (definido por Nico, 06/10)
+| Perfil | ⚡ Entrega inmediata | 🚚 Llega 28/10 · 📦 Encargo | IVA | Mínimo por pedido |
+|---|---|---|---|---|
+| Mayorista | BA (China + 8,5 % o + 6,5 % según modelo) | China | se suma | 6 pares (si todo es ⚡ BA, sin mínimo) |
+| Emprendedor | China + 30 % | China + 30 % | se suma | 3 pares |
+| Fly Free | FF | FF | **no** se suma | sin mínimo |
+
+El precio de venta sugerido se muestra **con IVA** (consumidor final), junto con lo que gana el cliente por unidad ($ y %).
+
 ## 5. Cómo va a funcionar
 
 ### Clientes
