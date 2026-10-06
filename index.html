@@ -496,12 +496,14 @@ const conIVA = ()=>cuenta.categoria!=="ff";
 const ML_COMISION = 0.25;   // comisión de Mercado Libre sobre el precio de venta al público
 const PERFIL = {mayorista:"Mayorista", emprendedor:"Emprendedor", ff:"Fly Free"};
 const perfilDe = k=>PERFIL[k]||"Mayorista";
-/* Mínimo de pares por pedido según el perfil. Mayorista: 6, salvo si todo es ⚡ Entrega inmediata (depósito BA). Emprendedor: 3. */
+/* Mínimo por pedido según el perfil: devuelve {n, llevas, txt} o null si está bien.
+   Mayorista: lo de ⚡ Depo BA, mínimo 6 unidades. Emprendedor: mínimo 3 pares en total. */
 function minimo(its){
-  if(cuenta.admin) return 0;   // el admin arma proformas para cualquiera, sin mínimo
-  if(cuenta.categoria==="emprendedor") return 3;
-  if(cuenta.categoria==="mayorista"&&its.some(i=>i.m!=="ya")) return 6;
-  return 0;
+  if(cuenta.admin) return null;   // el admin arma proformas para cualquiera, sin mínimo
+  const u=f=>its.filter(f).reduce((a,i)=>a+i.q,0);
+  if(cuenta.categoria==="emprendedor"){ const t=u(()=>true); return t&&t<3?{txt:`Pedido mínimo: 3 pares (llevás ${t})`}:null; }
+  if(cuenta.categoria==="mayorista"){ const b=u(i=>i.m==="ya"); return b&&b<6?{txt:`⚡ Depo BA: mínimo 6 unidades (llevás ${b})`}:null; }
+  return null;
 }
 const precio = (x,m)=>verPrecios()&&PRECIOS[x.id]?PRECIOS[x.id][m||"via"]||0:0;
 function totales(){
@@ -569,13 +571,13 @@ function renderBar(){
   const inc=incompletas(), e=cuenta.estado;
   $("#barT").classList.toggle("chico",!verPrecios());
   if(verPrecios()){ $("#barQ").textContent=uTxt(r.u)+(r.sub&&r.conIva?" · + IVA":""); $("#barT").textContent=fmt(r.sub);
-    const mn=minimo(r.its), falta=r.u&&r.u<mn;
-    $("#go").textContent="📄 Hacer pedido"; $("#go").disabled=!r.u||inc.length>0||falta;
-    if(falta&&!inc.length) $("#barW").textContent=`⚠️ Pedido mínimo: ${mn} pares (${perfilDe(cuenta.categoria)})${cuenta.categoria==="mayorista"?" · ⚡ Entrega inmediata sin mínimo":""}`; }
+    const mn=minimo(r.its);
+    $("#go").textContent="📄 Hacer pedido"; $("#go").disabled=!r.u||inc.length>0||!!mn;
+    if(mn&&!inc.length) $("#barW").textContent="⚠️ "+mn.txt.replace(/^⚠️ /,""); }
   else { $("#barQ").textContent=uTxt(r.u); $("#barT").textContent=e==="pendiente"?"Cuenta en aprobación":"Precios para clientes";
     $("#go").textContent=e==="pendiente"?"⏳ Esperando":e==="rechazado"?"No aprobada":"Registrarse";
     $("#go").disabled=e==="pendiente"||e==="rechazado"||e==="cargando"; }
-  if(inc.length||!verPrecios()||!(r.u&&r.u<minimo(r.its))) $("#barW").textContent=inc.length?"⚠️ Completá las cajas: "+inc.map(x=>`${x.n} ${x.col} (${faltan(x)===1?"falta 1":"faltan "+faltan(x)})`).join(", "):"";
+  if(inc.length||!verPrecios()||!minimo(r.its)) $("#barW").textContent=inc.length?"⚠️ Completá las cajas: "+inc.map(x=>`${x.n} ${x.col} (${faltan(x)===1?"falta 1":"faltan "+faltan(x)})`).join(", "):"";
 }
 
 $("#modos").addEventListener("click",e=>{ const b=e.target.closest(".modo"); if(!b) return; modo=modo===b.dataset.m?null:b.dataset.m; render(); });   // tocarlo de nuevo vuelve al catálogo

@@ -58,7 +58,7 @@ Estado al 06/10/2026. Lo definió Nico en la sesión anterior; acá está todo l
 ### Perfiles (definido por Nico, 06/10)
 | Perfil | ⚡ Entrega inmediata | 🚚 Llega 28/10 · 📦 Encargo | IVA | Mínimo por pedido |
 |---|---|---|---|---|
-| Mayorista | BA (China + 8,5 % o + 6,5 % según modelo) | China | se suma | 6 pares (si todo es ⚡ BA, sin mínimo) |
+| Mayorista | Depo BA (China + 8,5 % o + 6,5 % según modelo) | China, por **caja cerrada con la curva completa de talles** (falta definir la curva de cada modelo) | se suma | ⚡ Depo BA: 6 unidades |
 | Emprendedor | China + 30 % | China + 30 % | se suma | 3 pares |
 | Fly Free | FF | FF | **no** se suma | sin mínimo |
 
