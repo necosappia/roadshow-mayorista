@@ -539,7 +539,7 @@ function precioHTML(x,m){
   if(e!=="aprobado") return `<div class="price lock">⏳ Precio al aprobar tu cuenta</div>`;
   const pr=PRECIOS[x.id]; if(!pr) return `<div class="price tbc">Precio a confirmar</div>`;
   const ff=cuenta.categoria==="ff", nota=ff?"Precio Fly Free (sin IVA)":"Precio "+perfilDe(cuenta.categoria).toLowerCase()+" + IVA 21%";
-  const gana=v=>pr.pub&&v?`<span class="gana">Venta sugerida <b>${fmt(pr.pubIva)}</b> con IVA · ganás <b>${fmt(pr.pub-v)}</b> por unidad (${Math.round((pr.pub/v-1)*100)}%)</span>`:"";
+  const gana=v=>pr.pub&&v?`<span class="gana">Venta sugerida <b>${fmt(pr.pubIva)}</b> · ganás <b>${fmt(pr.pub-v)}</b> por unidad (${Math.round((pr.pub/v-1)*100)}%)</span>`:"";
   if(m) return `<div class="price">${fmt(pr[m])}<small>${nota}</small>${gana(pr[m])}</div>`;
   return pr.ya===pr.via?`<div class="price">${fmt(pr.via)}<small>${nota}</small>${gana(pr.via)}</div>`
     :`<div class="price">${fmt(pr.via)}<small>🚚 Llega 28/10 y 📦 Encargo · ${nota}</small><span class="otro">⚡ Entrega inmediata: ${fmt(pr.ya)}</span>${gana(pr.via)}</div>`;
