@@ -122,6 +122,11 @@ El precio de venta sugerido se muestra **con IVA** (consumidor final), junto con
 ### Maqueta aprobada como punto de partida
 Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al proveedor · Mercado Pago · Stock a costo), la cuenta corriente de Nico/FF con saldo, "Por cobrar" con estados (pendiente / a confirmar / vencido en rojo), "Clientes para aprobar", el resultado del mes y el stock por modelo (SR / en camino / costo). Pestañas: Resumen · Cuentas corrientes · Pedidos · Stock · Clientes · Precios · Cargar movimiento.
 
+### Cargado en la base (06/10)
+- **Pedido en tránsito (llega 28/10):** compra de **88 pares** (RS600 31, M4 PRO negro 21, M4 PRO morado 20, RS300 12, RX6 blanco 4) como stock `CAMINO`. Total a costo de lista $ 15.399.100 — **confirmar fecha y monto real** (¿pedido del 17/09 por $ 17.015.100?).
+- **Paula Berenguer** (cliente sin usuario, Mayorista, exclusividad Neuquén - Río Negro) con la **proforma 00021** (27 pares, $ 7.947.703,50 con IVA) en estado **a confirmar**, que **reserva** sus 27 pares del pedido en tránsito. Libres: **61**, igual a lo que muestra la página. Confirmar estado y seña.
+- SQL: `docs/supabase/09_carga_llega_28_10.sql`.
+
 ### Estado de la base (06/10)
 - Tablas: `admins`, `productos` (75), `clientes`, `operaciones`, `operacion_items`, `pagos`, `stock_movimientos`. Todas con RLS.
 - **Anónimo:** no ve nada (probado). **Admin:** ve y cambia todo; es quien esté en `admins` (vacía: se agrega el usuario de Nico cuando haga su login, etapa 3). La función `privado.es_admin()` no se expone en la API.
