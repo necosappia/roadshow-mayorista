@@ -787,7 +787,7 @@ function pintarCuenta(){
     ${cuenta.admin?`<div class="li"><span>Rol</span><b>Administrador</b></div>`:""}</div>
     ${e==="error"?errHTML("No se pudieron cargar tus datos: "+cuenta.error,true):""}`;
   const r=$("#ctaB").querySelector("[data-reint]"); if(r) r.onclick=()=>cargarCuenta(cuenta.user);
-  $("#admB").innerHTML=cuenta.admin?`<h3 style="font-size:24px;margin-top:8px">Clientes</h3><div class="box" id="clis">${cuenta.clis?"":"Cargando…"}</div>`:"";
+  $("#admB").innerHTML=cuenta.admin?`<a class="big bg-ac" href="admin/" style="display:flex;align-items:center;justify-content:center;text-decoration:none">🗂️ Abrir panel de administración</a><h3 style="font-size:24px;margin-top:14px">Clientes</h3><div class="box" id="clis">${cuenta.clis?"":"Cargando…"}</div>`:"";
   if(cuenta.admin&&cuenta.clis) pintarClientes();
 }
 /* Admin: aprobar clientes y elegir su lista */
