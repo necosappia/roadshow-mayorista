@@ -63,7 +63,7 @@ Estado al 06/10/2026. Lo definió Nico en la sesión anterior; acá está todo l
 | Fly Free | FF | FF | **no** se suma | sin mínimo |
 
 En el panel, "BA" se llama **Depo BA** (depósito de Buenos Aires). Cada empresa tiene su **historial** (pares comprados y $ invertidos), que se llena cuando los pedidos queden guardados en `operaciones`.
-El cliente ve también su ganancia vendiendo en **Mercado Libre** (ML se queda con el 25 % del precio de venta).
+Mercado Libre es para **nuestra** venta minorista (Sobre Ruedas): en el panel, ganancia = público con IVA − 25 % de ML − costo. El cliente **no** lo ve.
 
 El precio de venta sugerido se muestra **con IVA** (consumidor final), junto con lo que gana el cliente por unidad ($ y %).
 

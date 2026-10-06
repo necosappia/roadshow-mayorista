@@ -216,9 +216,6 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
 .price.lock small button{border:0;background:none;padding:0;color:var(--rs);font-weight:800;text-decoration:underline;cursor:pointer;font-size:13px}
 .price .gana{display:block;font-size:14px;font-weight:700;font-stretch:100%;color:var(--ink);margin-top:8px;background:color-mix(in srgb,var(--ok) 12%,var(--card));border:1px solid color-mix(in srgb,var(--ok) 45%,transparent);border-radius:10px;padding:7px 10px;line-height:1.35}
 .price .gana>span{display:block}
-.price .gana .ml{margin-top:3px;padding-top:4px;border-top:1px dashed color-mix(in srgb,var(--ok) 45%,transparent);font-size:13px}
-.price .gana b.neg{color:#C62828}
-.price .gana .nw{white-space:nowrap}
 .price .gana b{color:var(--ok);white-space:nowrap}
 .price .otro{display:block;font-size:14px;font-weight:700;font-stretch:100%;color:var(--soft);margin-top:6px}
 .err{background:#FDECEC;color:#C62828;border:1px solid #F5B5B5;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px;margin-top:10px}
@@ -493,7 +490,6 @@ let cuenta = {estado:"fuera"};   // fuera | cargando | pendiente | rechazado | a
 let PRECIOS = {};                // id -> {ya,via,enc}
 const verPrecios = ()=>cuenta.estado==="aprobado";
 const conIVA = ()=>cuenta.categoria!=="ff";
-const ML_COMISION = 0.25;   // comisión de Mercado Libre sobre el precio de venta al público
 const PERFIL = {mayorista:"Mayorista", emprendedor:"Emprendedor", ff:"Fly Free"};
 const perfilDe = k=>PERFIL[k]||"Mayorista";
 /* Mínimo por pedido según el perfil: devuelve {n, llevas, txt} o null si está bien.
@@ -547,8 +543,7 @@ function precioHTML(x,m){
   if(e!=="aprobado") return `<div class="price lock">⏳ Precio al aprobar tu cuenta</div>`;
   const pr=PRECIOS[x.id]; if(!pr) return `<div class="price tbc">Precio a confirmar</div>`;
   const ff=cuenta.categoria==="ff", nota=ff?"Precio Fly Free (sin IVA)":"Precio "+perfilDe(cuenta.categoria).toLowerCase()+" + IVA 21%";
-  const ml=v=>pr.pub*(1-ML_COMISION)-v;   // Mercado Libre se queda con el 25 % del precio de venta
-  const gana=v=>pr.pub&&v?`<span class="gana"><span>Venta sugerida <b>${fmt(pr.pubIva)}</b></span><span>Ganás <b>${fmt(pr.pub-v)}</b> por unidad <b>(${Math.round((pr.pub/v-1)*100)}%)</b></span><span class="ml">Mercado Libre −${ML_COMISION*100}%: <span class="nw">${ml(v)>=0?`ganás <b>${fmt(ml(v))}</b> <b>(${Math.round(ml(v)/v*100)}%)</b>`:`perdés <b class="neg">${fmt(-ml(v))}</b>`}</span></span></span>`:"";
+  const gana=v=>pr.pub&&v?`<span class="gana"><span>Venta sugerida <b>${fmt(pr.pubIva)}</b></span><span>Ganás <b>${fmt(pr.pub-v)}</b> por unidad <b>(${Math.round((pr.pub/v-1)*100)}%)</b></span></span>`:"";
   if(m) return `<div class="price">${fmt(pr[m])}<small>${nota}</small>${gana(pr[m])}</div>`;
   return pr.ya===pr.via?`<div class="price">${fmt(pr.via)}<small>${nota}</small>${gana(pr.via)}</div>`
     :`<div class="price">${fmt(pr.via)}<small>🚚 Llega 28/10 y 📦 Encargo · ${nota}</small><span class="otro">⚡ Entrega inmediata: ${fmt(pr.ya)}</span>${gana(pr.via)}</div>`;
