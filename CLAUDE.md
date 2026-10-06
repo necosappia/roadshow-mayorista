@@ -14,8 +14,8 @@ Leé primero **`docs/PLAN.md`**: ahí está todo lo que se decidió (cuenta corr
 - `index.html`: la página para clientes mayoristas. Un solo archivo, sin build. Fotos, logo y portada van adentro en base64 (por eso pesa ~1,3 MB).
 - **Publicada en Vercel** → https://roadshow.universosobreruedas.com (y https://roadshow-mayorista.vercel.app). Cada push a `main` se publica solo.
 - También hay una copia en Cloudflare (`roadshow-mayorista.necosappia.workers.dev`, `wrangler.jsonc`). Nico va a borrarla; no la uses como referencia.
-- `admin/index.html`: **panel de administración** (`/admin`), mismo estilo Roadshow. Solo entra quien está en la tabla `admins` de Supabase. Solapas: Inicio · Clientes (aprobar y elegir lista) · Precios (costo, listas, nuestro margen y nuestra ganancia vendiendo al por menor en Mercado Libre: público con IVA − 25 % − costo) · Pedidos (ventas con estado y detalle) · Stock (lo que llega el 28/10: importado, reservado y libre) · Finanzas (próximamente). No lleva datos escritos: todo sale de Supabase.
-- **Versiones:** el panel va por **BETA 1.2** (constante `VERSION` y la etiqueta del encabezado). Subí el número en cada cambio que publiques (0.2, 0.3…).
+- `admin/index.html`: **panel de administración** (`/admin`), mismo estilo Roadshow. Solo entra quien está en la tabla `admins` de Supabase. Solapas: Inicio · Clientes (aprobar y elegir lista) · Precios (costo, listas, nuestro margen y nuestra ganancia vendiendo al por menor en Mercado Libre: público con IVA − 25 % − costo) · Pedidos (ventas con estado; "Ver pedido" abre el desglose por modelo y talle; desde cada cliente, "Ver sus pedidos") · Stock (lo que llega el 28/10: importado, reservado y libre) · Finanzas (próximamente). No lleva datos escritos: todo sale de Supabase.
+- **Versiones:** el panel va por **BETA 1.3** (constante `VERSION` y la etiqueta del encabezado). Subí el número en cada cambio que publiques (0.2, 0.3…).
 - `docs/datos/`: el Excel de movimientos, la lista de precios y la proforma 00021 tal como los pasó Nico.
 
 ## Lo que NO se publica
