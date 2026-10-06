@@ -68,6 +68,15 @@ Estado al 06/10/2026. Lo definió Nico en la sesión anterior; acá está todo l
 - **Pago, por ahora: el total de la compra.** Dejarlo preparado para después: pago diferido 30/60, cheques, o "pagás cuando llega la mercadería".
 - Recomendado: el primer pedido de un cliente, o uno que supere su límite, queda **"a confirmar"** hasta que Nico lo apruebe.
 
+### Regla de oro: ningún roller sale sin orden
+- **Toda salida de mercadería tiene una orden**, también las de **Fly Free** (cliente con precio FF). Así el stock y la cuenta corriente siempre coinciden, y las ventas de FF quedan con modelo y talle.
+- **Estados de la orden:** Nueva → Confirmada (se carga la deuda en la cuenta corriente) → Preparada → Entregada/Despachada (se descuenta el stock) · Cancelada (se libera la reserva). Al crearse, la orden **reserva** el stock.
+- **Aviso a Nico por cada orden nueva:**
+  - **mail** a **sobreruedas.info.ar@gmail.com** con el detalle y la proforma;
+  - **número rojo** en "Pedidos nuevos" del tablero.
+  - Más adelante, quizás WhatsApp.
+  - Mail sugerido: Supabase Database Webhook / Edge Function + un servicio de envío (por ejemplo Resend). La clave del servicio va en los secretos de Supabase, nunca en el repo.
+
 ### Tablero (`/admin`, solo Nico)
 - **Caja:** efectivo, Mercado Pago y USD.
 - **Cuentas corrientes:** saldo de cada cliente (Nico/FF con su detalle), vencimientos y vencidos en rojo; deuda con el proveedor.
@@ -97,6 +106,11 @@ Estado al 06/10/2026. Lo definió Nico en la sesión anterior; acá está todo l
 | `stock_movimientos` | fecha, sku, cantidad ±, lugar (SR/FF/LP), operación |
 
 **Permisos (RLS):** el cliente aprobado lee productos con **solo su lista de precios** y lee y crea **sus** pedidos. El pedido se crea con una función (RPC) que valida el stock y calcula el precio en el servidor, nunca con el precio que manda el navegador. Nico (admin) ve todo. Los no aprobados solo ven modelos y fotos.
+
+### Maqueta aprobada como punto de partida
+Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al proveedor · Mercado Pago · Stock a costo), la cuenta corriente de Nico/FF con saldo, "Por cobrar" con estados (pendiente / a confirmar / vencido en rojo), "Clientes para aprobar", el resultado del mes y el stock por modelo (SR / en camino / costo). Pestañas: Resumen · Cuentas corrientes · Pedidos · Stock · Clientes · Precios · Cargar movimiento.
+
+**Ir por etapas:** primero la base y el tablero solo para Nico, con el historial cargado y verificado. Cuando confíe en los números, abrir el registro de clientes y los pedidos a cuenta corriente desde la página.
 
 ## 7. Pendientes
 
