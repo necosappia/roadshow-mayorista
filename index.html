@@ -147,6 +147,20 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
 .mped summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:10px;padding:12px 14px}.mped summary::-webkit-details-marker{display:none}
 .mped summary span{display:flex;flex-direction:column;min-width:0}.mped summary small{color:var(--soft);font-size:13px;font-weight:700}.mped .mt{text-align:right;align-items:flex-end;white-space:nowrap}
 .mped .mt small.debe{color:#E8590C}.mped .mt small.ok{color:var(--ok)}.mped .li{padding:8px 14px;border-top:1px solid var(--line)}.mped .li>span:last-child{white-space:nowrap;padding-left:10px}
+.cnav{position:sticky;top:0;z-index:9;background:var(--head);border-bottom:1px solid #2A2A2E}
+.cnav .wrap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding-top:8px;padding-bottom:8px}
+.cnav button{min-height:44px;border-radius:12px;border:1.5px solid #3A3A40;background:transparent;color:#fff;font-weight:900;font-size:15px;cursor:pointer;white-space:nowrap;padding:4px 6px;display:flex;align-items:center;justify-content:center;gap:6px}
+.ini-modos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ini-modos button{text-align:left;border:2px solid var(--mc);background:var(--card);color:var(--ink);border-radius:16px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:4px}.ini-modos b{font-size:17px}.ini-modos small{color:var(--soft);font-weight:600;font-size:13px}
+@media (max-width:700px){.ini-modos{grid-template-columns:1fr}}
+.cnav button[aria-pressed="true"]{background:#FF7A1A;border-color:#FF7A1A;color:#111}
+@media (max-width:560px){.cnav button{flex-direction:column;gap:0;font-size:11.5px;min-height:50px}.cnav button span{font-size:18px}}
+.hola{font-size:clamp(34px,7vw,52px);font-weight:900;font-stretch:72%;margin:6px 0 0;line-height:1}.hola span{color:#FF7A1A}
+.ini-go{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.ini-go .big{margin:0}
+@media (max-width:560px){.ini-go{grid-template-columns:1fr}}
+.escr{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-left:5px solid #FF7A1A;border-radius:18px;padding:16px 18px;margin-top:8px}
+.escr b{font-size:19px}.escr p{margin:4px 0 0;color:var(--soft)}.escr .ebt{display:flex;gap:10px;flex-wrap:wrap}.escr .big{margin:0;padding:0 18px;display:inline-flex;align-items:center;text-decoration:none;min-height:48px}
+.rec .rbt{display:grid;gap:8px;margin-top:auto}.rec .rbt .big{margin:0;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.rvid{display:flex;gap:10px;flex-wrap:wrap}
 .misb{display:block;width:100%;margin-top:8px;min-height:52px;border-radius:14px;border:1.5px solid #FF7A1A;background:transparent;color:#fff;font-weight:900;font-size:16px;cursor:pointer}
 .misb[aria-pressed="true"]{background:#FF7A1A;color:#111}
 .mis-full{grid-column:1/-1}
@@ -272,6 +286,7 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
   <div class="acc" id="acc"><button type="button" id="bIng">Ingresar</button><button type="button" class="pri" id="bReg">Registrarse</button></div>
 </div></div>
 <div class="aviso" id="aviso" hidden><div class="wrap" id="avisoT"></div></div>
+<nav class="cnav" id="cnav" hidden aria-label="Mi perfil"><div class="wrap" id="cnavB"></div></nav>
 
 <header class="cover">
   <img id="portada" alt="Línea Roadshow">
@@ -281,7 +296,6 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
     <p class="ar">EN ARGENTINA<span class="y">.</span></p>
     <p class="lead">Elegí cómo lo querés, cuántos de cada talle y tocá <b>Hacer pedido</b> para generar la proforma.</p>
     <div class="modos" id="modos" role="toolbar" aria-label="Forma de entrega"></div>
-    <button class="misb" id="misB" type="button" hidden>🧾 Mis pedidos y mi stock</button>
     <p class="nota" id="nota"></p>
   </div>
 </header>
@@ -593,11 +607,42 @@ function precioHTML(x,m){
     :`<div class="price">${fmt(pr.via)}<small>🚚 Llega 28/10 y 📦 Encargo · ${nota}</small><span class="otro">⚡ Entrega inmediata: ${fmt(pr.ya)}</span>${gana(pr.via)}</div>`;
 }
 const esCliente=()=>!!(cuenta.cliente&&cuenta.cliente.estado==="aprobado"&&!cuenta.admin);
-let vistaMis=false, MIS=null, MIS_ERR=null;   // "Mis pedidos y mi stock": se arma con los pedidos del cliente
+let vistaMis=false, MIS=null, MIS_ERR=null;
+// Menú del cliente aprobado: Inicio · Productos · Pedidos · Recursos (sin cuenta: solo el catálogo)
+let seccion="inicio";
+const SECC=[["inicio","🏠","Inicio"],["productos","🛍️","Productos"],["pedidos","🧾","Pedidos"],["recursos","📚","Recursos"]];
+const escribinos=()=>`<div class="mis-full escr"><div><b>🎨 ¿Te gustaría un color en especial?</b><p>Escribinos y lo vemos para el próximo encargo a fábrica.</p></div>
+  <div class="ebt">${WA?`<a class="big bg-wa" href="https://wa.me/${WA}?text=${encodeURIComponent("Hola! Me gustaría pedir un color especial: ")}" target="_blank" rel="noopener">💬 WhatsApp</a>`:""}<a class="big bg-ac" href="mailto:${EMAIL}?subject=${encodeURIComponent("Color especial Roadshow")}">✉️ Escribinos</a></div></div>`;
+function inicioHTML(){
+  const c=cuenta.cliente, ok=(MIS||[]).filter(o=>o.estado!=="cancelada"), curso=ok.filter(o=>o.estado!=="entregada");
+  const via=ok.filter(o=>o.estado!=="entregada").reduce((a,o)=>a+(o.operacion_items||[]).filter(i=>i.modo==="via").reduce((b,i)=>b+i.cantidad,0),0);
+  const debe=ok.reduce((a,o)=>a+Math.max(0,Number(o.total)-(o.pagos||[]).reduce((b,p)=>b+Number(p.monto),0)),0);
+  const kp=(l,n,d,col)=>`<div class="mk" style="--c:${col}"><span>${l}</span><b>${n}</b><small>${d}</small></div>`;
+  return `<div class="mis-full"><h2 class="hola">Hola, <span>${esc(c.nombre||c.razon_social||"")}</span> 👋</h2>
+    <p class="lead" style="margin:4px 0 14px">Tu lista: <b>${perfilDe(c.categoria)}</b>. Elegí abajo cómo querés comprar para ver precios y talles.</p>
+    ${MIS==null?`<p class="lead">Cargando tus pedidos…</p>`:`<div class="mks">${kp("Pedidos en curso",curso.length,curso.length?"sin entregar todavía":"nada pendiente","#FF7A1A")}${kp("🚚 Te llega el 28/10",via===1?"1 par":via+" pares","en camino","#2563EB")}${kp("Saldo a pagar",fmt(debe),debe>=1?"según tus pedidos":"✅ estás al día",debe>=1?"#E8590C":"#0E9F6E")}${kp("Compraste",ok.reduce((a,o)=>a+(o.operacion_items||[]).reduce((b,i)=>b+i.cantidad,0),0)+" pares","desde que empezaste","#0E9F6E")}</div>`}
+    <h2 class="msec">¿Cómo querés comprar?</h2><div class="ini-modos">${Object.entries(MODOS).map(([k,v])=>`<button type="button" data-sec="productos" data-mg="${k}" style="--mc:${v.c}"><b>${v.i} ${v.n}</b><small>${esc(v.nota)}</small></button>`).join("")}</div>
+    <div class="ini-go"><button class="big bg-ac" type="button" data-sec="productos">🛍️ Ver todos los productos</button><button class="big sec" type="button" data-sec="pedidos">🧾 Mis pedidos y mi stock</button></div></div>`+escribinos();
+}
+function recursosHTML(){
+  const conFoto=RS.filter(x=>FOTOS[x.id]);
+  return `<div class="mis-full"><h2 class="msec" style="margin-top:0">Fotos para tus publicaciones</h2><p class="lead" style="margin:0 0 6px">Bajalas y usalas en Instagram, Mercado Libre o tu catálogo.</p></div>`
+    +conFoto.map(x=>`<article class="prod rec" data-id="${x.id}"><button class="foto" aria-label="Ver foto grande de ${esc(x.n)} ${esc(x.col)}"><img src="${FOTOS[x.id]}" alt="${esc(x.n)} ${esc(x.col)}" loading="lazy"></button>
+      <div class="body"><div><div class="nrow"><h2 class="name">${esc(x.n)}</h2></div><p class="col"><span class="dot" style="--d:${x.dot}"></span>${esc(x.col)}</p></div>
+      <div class="rbt"><a class="big bg-ac" href="${FOTOS[x.id]}" download="Roadshow-${esc((x.n+"-"+x.col).replace(/\s+/g,"-"))}.webp">⬇️ Bajar foto</a>${x.info?`<button class="big sec" type="button" data-info="${x.info}">ⓘ Ficha técnica</button>`:""}</div></div></article>`).join("")
+    +(VIDEOS.length?`<div class="mis-full"><h2 class="msec">Videos</h2><div class="rvid">${VIDEOS.map(v=>`<a class="vbtn" href="${ytLink(v)}" target="_blank" rel="noopener"><b>▶</b> ${esc(v.n||"Ver video")}</a>`).join("")}</div></div>`:"")
+    +escribinos();
+}   // "Mis pedidos y mi stock": se arma con los pedidos del cliente
 function render(){
   const cnt=k=>items().filter(i=>i.m===k).reduce((a,i)=>a+i.q,0);
-  if(!esCliente()) vistaMis=false;
-  $("#misB").hidden=!esCliente(); $("#misB").setAttribute("aria-pressed",vistaMis);
+  const sec=esCliente()?seccion:"productos";   // sin cuenta aprobada: solo el catálogo
+  vistaMis=sec==="pedidos";
+  $("#cnav").hidden=!esCliente(); document.querySelector("header.cover").hidden=sec!=="productos";
+  if(esCliente()) $("#cnavB").innerHTML=SECC.map(([k,i,n])=>`<button type="button" data-s="${k}" aria-pressed="${k===sec}"><span>${i}</span>${n}</button>`).join("");
+  if(sec==="inicio"||sec==="recursos"){ $("#modos").innerHTML=Object.entries(MODOS).map(([k,v])=>`<button class="modo" data-m="${k}" style="--mc:${v.c}" aria-pressed="false"><span>${v.i} ${v.n}</span>${cnt(k)?`<em>${cnt(k)}</em>`:""}</button>`).join("");
+    $("#nota").textContent=seccion==="inicio"?"Tocá cómo lo querés para ver precios, talles y armar tu pedido.":"Material para que vendas: fotos, fichas y videos.";
+    $("#nota").style.setProperty("--mc","#FF7A1A"); $("#cats").innerHTML="";
+    $("#list").innerHTML=seccion==="inicio"?inicioHTML():recursosHTML(); renderBar(); return; }
   if(vistaMis){ $("#modos").innerHTML=Object.entries(MODOS).map(([k,v])=>`<button class="modo" data-m="${k}" style="--mc:${v.c}" aria-pressed="false"><span>${v.i} ${v.n}</span>${cnt(k)?`<em>${cnt(k)}</em>`:""}</button>`).join("");
     $("#nota").textContent="Tus pedidos, lo que ya tenés y lo que te va a llegar."; $("#nota").style.setProperty("--mc","#FF7A1A");
     $("#cats").innerHTML=""; $("#list").innerHTML=misHTML(); renderBar(); return; }
@@ -609,7 +654,7 @@ function render(){
   $("#cats").innerHTML = CATS.filter(c=>c==="Todos"||vis.some(x=>x.cat===c))
     .map(c=>`<button class="cat" data-c="${c}" aria-pressed="${c===filtro}">${c}</button>`).join("");
   const f=vis.filter(x=>filtro==="Todos"||x.cat===filtro);
-  $("#list").innerHTML = f.length?f.map(card).join(""):'<p class="lead">No hay productos de esta categoría acá.</p>';
+  $("#list").innerHTML = (f.length?f.map(card).join(""):'<p class="lead">No hay productos de esta categoría acá.</p>')+escribinos();
   renderBar();
 }
 function renderBar(){
@@ -628,8 +673,10 @@ function renderBar(){
   if(inc.length||!verPrecios()||!minimo(r.its)) $("#barW").textContent=inc.length?"⚠️ Completá las cajas: "+inc.map(x=>`${x.n} ${x.col} (${faltan(x)===1?"falta 1":"faltan "+faltan(x)})`).join(", "):"";
 }
 
-$("#modos").addEventListener("click",e=>{ const b=e.target.closest(".modo"); if(!b) return; modo=vistaMis?b.dataset.m:modo===b.dataset.m?null:b.dataset.m; vistaMis=false; render(); });
-$("#misB").addEventListener("click",()=>{ vistaMis=!vistaMis; if(vistaMis&&cuenta.cliente) cargarHistorial(cuenta.cliente.id); render(); $("#misB").scrollIntoView({block:"start",behavior:"smooth"}); });   // tocarlo de nuevo vuelve al catálogo
+$("#modos").addEventListener("click",e=>{ const b=e.target.closest(".modo"); if(!b) return; modo=seccion!=="productos"?b.dataset.m:modo===b.dataset.m?null:b.dataset.m; seccion="productos"; render(); });
+const irSeccion=k=>{ seccion=k; if(k==="pedidos"&&cuenta.cliente) cargarHistorial(cuenta.cliente.id); render(); window.scrollTo({top:0,behavior:"smooth"}); };
+$("#cnav").addEventListener("click",e=>{ const b=e.target.closest("[data-s]"); if(b) irSeccion(b.dataset.s); });
+$("#list").addEventListener("click",e=>{ const b=e.target.closest("[data-sec]"); if(!b) return; if(b.dataset.mg!==undefined) modo=b.dataset.mg||null; else if(b.dataset.sec==="productos") modo=null; irSeccion(b.dataset.sec); });   // tocarlo de nuevo vuelve al catálogo
 $("#cats").addEventListener("click",e=>{ const b=e.target.closest(".cat"); if(!b) return; filtro=b.dataset.c; render(); });
 $("#list").addEventListener("click",e=>{
   const art=e.target.closest(".prod"); if(!art) return; const x=RX[art.dataset.id];
@@ -784,7 +831,7 @@ $("#gen").addEventListener("click",async()=>{
     if(confirmaEnBase()){
       Object.keys(pedido).forEach(k=>delete pedido[k]); render();
       b.className="big bg-ac"; b.textContent="✅ Pedido confirmado"; b.disabled=true; setMsg("");
-      nuevoPed=pedidoId; abrirSheet("ctaS");   // sale de donde armaba el pedido y lo lleva a "Mi cuenta" con el pedido nuevo abierto
+      nuevoPed=pedidoId; $("#sheet").classList.remove("show"); irSeccion("pedidos");   // sale de donde armaba el pedido y lo lleva a 🧾 Pedidos con el pedido nuevo abierto
       const av=$("#aviso"), t=$("#avisoT"); av.hidden=false; av.className="aviso"; t.textContent=`✅ Pedido N° ${datos.nro} confirmado. Ya te bajó la proforma.`;
     } else { b.className="big bg-ac"; b.textContent="📄 Generar de nuevo"; setMsg(`✅ Proforma N° ${datos.nro} descargada.`); }
   }catch(e){ mal(confirmaEnBase()?`El pedido N° ${datos.nro} quedó guardado, pero no se pudo bajar la proforma: `+(e&&e.message||e):"No se pudo generar la proforma: "+(e&&e.message||e)); }
@@ -880,7 +927,7 @@ async function cargarCuenta(user){
     const perfil=(pr.data||[])[0]?.perfil;
     cuenta={estado,user,admin,doble,comoCliente,cliente:c,categoria:perfil||(c&&c.estado==="aprobado"?c.categoria:"mayorista")};
   }catch(e){ PRECIOS={}; cuenta={estado:"error",user,error:traducir(e.message||String(e))}; }
-  MIS=null; MIS_ERR=null; pintarTodo();
+  MIS=null; MIS_ERR=null; seccion="inicio"; pintarTodo();
   if(cuenta.admin) cargarClientes();
   if(esCliente()) cargarHistorial(cuenta.cliente.id);
 }
@@ -951,7 +998,7 @@ function misHTML(){
 }
 async function cargarHistorial(id){
   const {data,error}=await sb.from("operaciones").select("id,fecha,estado,numero_proforma,total,operacion_items(sku,cantidad,precio_unitario,modo),pagos(monto)").eq("cliente_id",id).eq("tipo","venta").order("fecha",{ascending:false}).order("id",{ascending:false});
-  if(error){ MIS_ERR=traducir(error.message); } else { MIS=data; MIS_ERR=null; } if(vistaMis) render();
+  if(error){ MIS_ERR=traducir(error.message); } else { MIS=data; MIS_ERR=null; } if(vistaMis||seccion==="inicio") render();
   const el=$("#hist"), lp=$("#misPed"); if(!el) return;
   if(error){ el.innerHTML=`<span style="color:#C62828">No se pudo leer</span> <button type="button" class="link" id="histR">🔄 Reintentar</button>`; $("#histR").onclick=()=>cargarHistorial(id);
     if(lp) lp.innerHTML=""; return; }
