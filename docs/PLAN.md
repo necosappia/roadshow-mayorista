@@ -128,6 +128,7 @@ Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al prove
 - SQL: `docs/supabase/09_carga_llega_28_10.sql`.
 - **Paula, primer pedido (Depo BA):** proforma también numerada **00021** (17/09), 18 pares, $ 4.440.800 + IVA = **$ 5.373.368**, estado entregada, sin número en la base porque el 21 lo usa la del 28/10. PDF: `docs/datos/proforma-00021-depo-ba.pdf`. SQL: `docs/supabase/11_carga_paula_depo_ba.sql`. **Confirmar pago** (¿los $ 4.499.566,50 del 11/09?). Ojo: hay dos proformas con el mismo número.
 - **Tucumán ("Empresa C"):** cliente "Cliente Tucumán" (faltan razón social, CUIT y contacto; perfil a confirmar) con su pedido del **09/09** por Depo BA: 5 pares (RS600 42/43, RX6D 42/43, RSJ L rosa, RSJ L azul, RSK M), **$ 778.135** (en el Excel $ 778.000). Lo cobró Nico en efectivo. SQL: `docs/supabase/12_carga_tucuman.sql`.
+- **Gastos (Excel):** embalaje $ 49.300 (18/09), contador $ 120.000 y $ 70.000 (29/09). Falta el monto del monotributo de octubre. SQL: `docs/supabase/14_gastos_excel.sql`. Desde el panel (Finanzas) se cargan gastos nuevos.
 - **Fly Free (PISAPPCO SRL):** 153 pares del 20/04 al 27/06/2026, $ 21.373.680, como una sola venta. SQL: `docs/supabase/10_carga_ff_153_pares.sql`. Falta cargar sus **pagos** (sección 2) para ver el saldo de 7.678.590.
 
 ### Estado de la base (06/10)
