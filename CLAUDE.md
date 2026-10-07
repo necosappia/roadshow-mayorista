@@ -1,7 +1,7 @@
 # Instrucciones para trabajar en este proyecto
 
 **Universo Sobre Ruedas** (mayorista de rollers Roadshow). Dueño: Nico Sappia.
-Nico no es programador: hablale en español rioplatense, frases cortas, paso a paso y con capturas cuando tenga que tocar algo en una web (Vercel, Hostinger, Supabase). Cuando cambies la página, mandale el `index.html` y una captura.
+Nico no es programador: hablale en español rioplatense, frases cortas, paso a paso y con capturas cuando tenga que tocar algo en una web (Vercel, Hostinger, Supabase). Cuando cambies la página, mandale el `index.html` y una captura. **Al terminar cada respuesta, pasale siempre los dos links para ver:** Usuario https://roadshow-mayorista-git-claude-vibrant-ride-pgnbfy-necooo.vercel.app y Admin https://roadshow-mayorista-git-claude-vibrant-ride-pgnbfy-necooo.vercel.app/admin (cuando se publique en `main`: https://roadshow.universosobreruedas.com y /admin).
 
 > ⚠️ Este repo **no** es el sistema de ventas de Fly Free (`fly-free-sistema`). Si un pedido parece de ese otro sistema (Rama, Fruti, Valen, Despacho, Planes NM…), **preguntá antes de tocar nada**. Ya pasó una vez.
 
