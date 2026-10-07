@@ -147,6 +147,18 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
 .mped summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:10px;padding:12px 14px}.mped summary::-webkit-details-marker{display:none}
 .mped summary span{display:flex;flex-direction:column;min-width:0}.mped summary small{color:var(--soft);font-size:13px;font-weight:700}.mped .mt{text-align:right;align-items:flex-end;white-space:nowrap}
 .mped .mt small.debe{color:#E8590C}.mped .mt small.ok{color:var(--ok)}.mped .li{padding:8px 14px;border-top:1px solid var(--line)}.mped .li>span:last-child{white-space:nowrap;padding-left:10px}
+.misb{display:block;width:100%;margin-top:8px;min-height:52px;border-radius:14px;border:1.5px solid #FF7A1A;background:transparent;color:#fff;font-weight:900;font-size:16px;cursor:pointer}
+.misb[aria-pressed="true"]{background:#FF7A1A;color:#111}
+.mis-full{grid-column:1/-1}
+.mks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.mk{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:2px}
+.mk span{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}.mk b{font-size:28px;font-weight:900;font-stretch:78%}.mk small{color:var(--soft);font-weight:700}
+.mdebe{margin:12px 0 0;font-size:17px;font-weight:700;color:#E8590C}.mdebe.ok{color:var(--ok)}
+.msec{font-size:28px;font-weight:900;font-stretch:78%;margin:22px 0 6px}
+.mtab{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}.mtab th{font-size:10.5px;letter-spacing:.06em;color:var(--soft);text-align:right;padding:6px 4px;border-bottom:1px solid var(--line)}.mtab td{text-align:right;padding:7px 4px;border-bottom:1px solid var(--line);font-weight:700}
+.mtab th:first-child,.mtab td:first-child{text-align:left}
+.mstk .foto{cursor:default}
+@media (max-width:700px){.mks{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .rr{display:flex;align-items:center;white-space:nowrap}
 .bar .t strong.chico{font-size:20px;white-space:normal}
 .bar button{height:56px;border:0;border-radius:14px;background:var(--rs);color:#fff;font-weight:900;font-size:17px;padding:0 22px;cursor:pointer}
@@ -269,6 +281,7 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
     <p class="ar">EN ARGENTINA<span class="y">.</span></p>
     <p class="lead">Elegí cómo lo querés, cuántos de cada talle y tocá <b>Hacer pedido</b> para generar la proforma.</p>
     <div class="modos" id="modos" role="toolbar" aria-label="Forma de entrega"></div>
+    <button class="misb" id="misB" type="button" hidden>🧾 Mis pedidos y mi stock</button>
     <p class="nota" id="nota"></p>
   </div>
 </header>
@@ -579,8 +592,15 @@ function precioHTML(x,m){
   return pr.ya===pr.via?`<div class="price">${fmt(pr.via)}<small>${nota}</small>${gana(pr.via)}</div>`
     :`<div class="price">${fmt(pr.via)}<small>🚚 Llega 28/10 y 📦 Encargo · ${nota}</small><span class="otro">⚡ Entrega inmediata: ${fmt(pr.ya)}</span>${gana(pr.via)}</div>`;
 }
+const esCliente=()=>!!(cuenta.cliente&&cuenta.cliente.estado==="aprobado"&&!cuenta.admin);
+let vistaMis=false, MIS=null, MIS_ERR=null;   // "Mis pedidos y mi stock": se arma con los pedidos del cliente
 function render(){
   const cnt=k=>items().filter(i=>i.m===k).reduce((a,i)=>a+i.q,0);
+  if(!esCliente()) vistaMis=false;
+  $("#misB").hidden=!esCliente(); $("#misB").setAttribute("aria-pressed",vistaMis);
+  if(vistaMis){ $("#modos").innerHTML=Object.entries(MODOS).map(([k,v])=>`<button class="modo" data-m="${k}" style="--mc:${v.c}" aria-pressed="false"><span>${v.i} ${v.n}</span>${cnt(k)?`<em>${cnt(k)}</em>`:""}</button>`).join("");
+    $("#nota").textContent="Tus pedidos, lo que ya tenés y lo que te va a llegar."; $("#nota").style.setProperty("--mc","#FF7A1A");
+    $("#cats").innerHTML=""; $("#list").innerHTML=misHTML(); renderBar(); return; }
   $("#modos").innerHTML=Object.entries(MODOS).map(([k,v])=>`<button class="modo" data-m="${k}" style="--mc:${v.c}" aria-pressed="${k===modo}"><span>${v.i} ${v.n}</span>${cnt(k)?`<em>${cnt(k)}</em>`:""}</button>`).join("");
   $("#nota").textContent=modo?MODOS[modo].nota:"Mirá los modelos y tocá cómo lo querés para elegir talles y pedir.";
   $("#nota").style.setProperty("--mc",modo?MODOS[modo].c:"#FF7A1A");
@@ -608,7 +628,8 @@ function renderBar(){
   if(inc.length||!verPrecios()||!minimo(r.its)) $("#barW").textContent=inc.length?"⚠️ Completá las cajas: "+inc.map(x=>`${x.n} ${x.col} (${faltan(x)===1?"falta 1":"faltan "+faltan(x)})`).join(", "):"";
 }
 
-$("#modos").addEventListener("click",e=>{ const b=e.target.closest(".modo"); if(!b) return; modo=modo===b.dataset.m?null:b.dataset.m; render(); });   // tocarlo de nuevo vuelve al catálogo
+$("#modos").addEventListener("click",e=>{ const b=e.target.closest(".modo"); if(!b) return; modo=vistaMis?b.dataset.m:modo===b.dataset.m?null:b.dataset.m; vistaMis=false; render(); });
+$("#misB").addEventListener("click",()=>{ vistaMis=!vistaMis; if(vistaMis&&cuenta.cliente) cargarHistorial(cuenta.cliente.id); render(); $("#misB").scrollIntoView({block:"start",behavior:"smooth"}); });   // tocarlo de nuevo vuelve al catálogo
 $("#cats").addEventListener("click",e=>{ const b=e.target.closest(".cat"); if(!b) return; filtro=b.dataset.c; render(); });
 $("#list").addEventListener("click",e=>{
   const art=e.target.closest(".prod"); if(!art) return; const x=RX[art.dataset.id];
@@ -859,8 +880,9 @@ async function cargarCuenta(user){
     const perfil=(pr.data||[])[0]?.perfil;
     cuenta={estado,user,admin,doble,comoCliente,cliente:c,categoria:perfil||(c&&c.estado==="aprobado"?c.categoria:"mayorista")};
   }catch(e){ PRECIOS={}; cuenta={estado:"error",user,error:traducir(e.message||String(e))}; }
-  pintarTodo();
+  MIS=null; MIS_ERR=null; pintarTodo();
   if(cuenta.admin) cargarClientes();
+  if(esCliente()) cargarHistorial(cuenta.cliente.id);
 }
 function pintarTodo(){
   const e=cuenta.estado, n=cuenta.pend||0;
@@ -895,12 +917,41 @@ function pintarCuenta(){
 /* Historial del cliente: resumen (pares y $) y la lista de sus pedidos con el detalle */
 let nuevoPed=null;   // el pedido recién confirmado: se abre y se marca en "Mis pedidos"
 const ESTADO_CLI={nueva:"Recibido",a_confirmar:"A confirmar",confirmada:"Confirmado",preparada:"Preparado",entregada:"Entregado",cancelada:"Cancelado"};
+function prodSku(sku){   // sku → {id, x (producto de la página), t (talle), nombre}
+  let mejor=null; for(const [id,ref] of Object.entries(REF)){ const pre=ref.replace("|",""); if(sku.startsWith(pre)&&(!mejor||pre.length>mejor.pre.length)) mejor={id,pre}; }
+  if(!mejor) return {id:null,x:null,t:"",nombre:sku}; const x=RS.find(y=>y.id===mejor.id); return {id:mejor.id,x,t:sku.slice(mejor.pre.length),nombre:x?x.n+" "+x.col:mejor.id}; }
 function nombreSku(sku){   // "M4PROM38/39" → M4 PRO Morado · 38/39 (con lo que ya sabe la página: REF y RS)
   let mejor=null; for(const [id,ref] of Object.entries(REF)){ const pre=ref.replace("|",""); if(sku.startsWith(pre)&&(!mejor||pre.length>mejor.pre.length)) mejor={id,pre}; }
   if(!mejor) return sku; const x=RS.find(y=>y.id===mejor.id), t=sku.slice(mejor.pre.length);
   return `${x?x.n+" "+x.col:mejor.id}${t?" · "+t:""}`; }
+function misHTML(){
+  if(MIS_ERR) return `<div class="mis-full">${errHTML("No se pudieron leer tus pedidos: "+MIS_ERR,true)}</div>`;
+  if(MIS==null) return `<div class="mis-full"><p class="lead">Cargando tus pedidos…</p></div>`;
+  const ok=MIS.filter(o=>o.estado!=="cancelada");
+  if(!ok.length) return `<div class="mis-full"><p class="lead">Todavía no hiciste pedidos. Elegí cómo lo querés arriba y armá el primero.</p></div>`;
+  // stock por producto y talle: ✅ ya lo tenés (entregado) · 🚚 llega 28/10 · ⏳ pedido (en preparación o a encargo)
+  const st={};
+  ok.forEach(o=>(o.operacion_items||[]).forEach(i=>{ const k=prodSku(i.sku); const g=(st[k.id||i.sku]=st[k.id||i.sku]||{k,t:{},n:0});
+    const e=o.estado==="entregada"?"ten":i.modo==="via"?"via":"ped", t=(g.t[k.t||"—"]=g.t[k.t||"—"]||{ten:0,via:0,ped:0}); t[e]+=i.cantidad; g.n+=i.cantidad; }));
+  const tot=a=>Object.values(st).reduce((s,g)=>s+Object.values(g.t).reduce((b,t)=>b+t[a],0),0);
+  const pares=ok.reduce((a,o)=>a+(o.operacion_items||[]).reduce((b,i)=>b+i.cantidad,0),0), plata=ok.reduce((a,o)=>a+Number(o.total||0),0);
+  const debe=ok.reduce((a,o)=>a+Math.max(0,Number(o.total)-(o.pagos||[]).reduce((b,p)=>b+Number(p.monto),0)),0);
+  const pp=n=>n===1?"1 par":n+" pares", kp=(l,n,d,c)=>`<div class="mk" style="--c:${c}"><span>${l}</span><b>${n}</b><small>${d}</small></div>`;
+  const nro=o=>o.numero_proforma?"Proforma "+String(o.numero_proforma).padStart(5,"0"):"Pedido #"+o.id;
+  return `<div class="mis-full"><div class="mks">${kp("Compraste",pp(pares),fmt(plata),"#FF7A1A")}${kp("✅ Ya tenés",pp(tot("ten")),"entregados","#0E9F6E")}${kp("🚚 Te llega el 28/10",pp(tot("via")),"en camino","#2563EB")}${kp("⏳ En preparación",pp(tot("ped")),"pedidos sin entregar","#B45309")}</div>
+    ${debe>=1?`<p class="mdebe">Saldo a pagar: <b>${fmt(debe)}</b></p>`:`<p class="mdebe ok">✅ Estás al día con los pagos</p>`}
+    <h2 class="msec">Mi stock</h2></div>`
+  +Object.values(st).sort((a,b)=>b.n-a.n).map(g=>{ const x=g.k.x, ts=Object.entries(g.t).sort((a,b)=>(parseInt(a[0])||0)-(parseInt(b[0])||0));
+    return `<article class="prod mstk"><div class="foto${x&&FOTOS[x.id]?"":" sin"}">${x&&FOTOS[x.id]?`<img src="${FOTOS[x.id]}" alt="${esc(x.n+" "+x.col)}" loading="lazy">`:""}<div class="ph"><b>${esc(x?x.n:g.k.id||"")}</b><span>${esc(x?x.col:"")}</span></div></div>
+      <div class="body"><div><h2 class="name">${esc(x?x.n:g.k.nombre)}</h2><p class="col">${x?`<span class="dot" style="--d:${x.dot}"></span>${esc(x.col)}`:""} · <b>${g.n} ${g.n===1?"par":"pares"}</b></p></div>
+      <table class="mtab"><thead><tr><th>TALLE</th><th>✅ TENÉS</th><th>🚚 LLEGA</th><th>⏳ PEDIDO</th></tr></thead><tbody>${ts.map(([t,v])=>`<tr><td>${esc(t)}</td><td>${v.ten||"—"}</td><td>${v.via||"—"}</td><td>${v.ped||"—"}</td></tr>`).join("")}</tbody></table></div></article>`; }).join("")
+  +`<div class="mis-full"><h2 class="msec">Mis pedidos</h2>${ok.map(o=>{ const its=o.operacion_items||[], n=its.reduce((a,i)=>a+i.cantidad,0), pag=(o.pagos||[]).reduce((a,p)=>a+Number(p.monto),0), d=Math.max(0,Number(o.total)-pag);
+      return `<details class="mped${o.id===nuevoPed?" nuevo":""}"${o.id===nuevoPed?" open":""}><summary><span><b>${o.id===nuevoPed?"🆕 ":""}${nro(o)}</b><small>${new Date(o.fecha+"T12:00").toLocaleDateString("es-AR")} · ${n} ${n===1?"par":"pares"} · ${ESTADO_CLI[o.estado]||o.estado}</small></span><span class="mt"><b>${fmt(o.total)}</b><small class="${d>=1?"debe":"ok"}">${d>=1?"Debe "+fmt(d):"Pagado"}</small></span></summary>
+        ${its.map(i=>`<div class="li"><span><span class="q">${i.cantidad}</span> ${esc(nombreSku(i.sku))}${i.modo&&MODOS[i.modo]?` <span class="mtag" style="--mc:${MODOS[i.modo].c}">${MODOS[i.modo].i} ${MODOS[i.modo].corto}</span>`:""}</span><span>${fmt(i.cantidad*i.precio_unitario)}</span></div>`).join("")}</details>`; }).join("")}</div>`;
+}
 async function cargarHistorial(id){
   const {data,error}=await sb.from("operaciones").select("id,fecha,estado,numero_proforma,total,operacion_items(sku,cantidad,precio_unitario,modo),pagos(monto)").eq("cliente_id",id).eq("tipo","venta").order("fecha",{ascending:false}).order("id",{ascending:false});
+  if(error){ MIS_ERR=traducir(error.message); } else { MIS=data; MIS_ERR=null; } if(vistaMis) render();
   const el=$("#hist"), lp=$("#misPed"); if(!el) return;
   if(error){ el.innerHTML=`<span style="color:#C62828">No se pudo leer</span> <button type="button" class="link" id="histR">🔄 Reintentar</button>`; $("#histR").onclick=()=>cargarHistorial(id);
     if(lp) lp.innerHTML=""; return; }
