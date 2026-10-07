@@ -639,7 +639,7 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ document.querySel
 let ultimo=null;   // última proforma generada (para WhatsApp)
 function abrir(){
   const r=totales(); ultimo=null; $("#wa").hidden=true; setMsg("");
-  $("#gen").className="big bg-ac"; $("#gen").textContent="📄 Generar proforma";
+  $("#gen").className="big bg-ac"; $("#gen").textContent=genTxt(); $("#gen").disabled=false;
   $("#resumen").innerHTML=r.its.map(i=>`<div class="li"><span><span class="q">${i.q}</span> ${esc(i.x.n)} ${esc(i.x.col)} · ${esc(i.t)} <span class="mtag" style="--mc:${MODOS[i.m].c}">${MODOS[i.m].i} ${MODOS[i.m].corto}</span></span><span>${i.p?fmt(i.q*i.p):"A confirmar"}</span></div>`).join("")
     +`<div style="margin-top:8px"><div class="tot"><span>Total de unidades</span><b>${r.u}</b></div>
       <div class="tot"><span>Subtotal</span><span>${fmt2(r.sub)}</span></div>
@@ -729,25 +729,43 @@ function descargar(blob,nombre){
   const url=URL.createObjectURL(blob), a=document.createElement("a");
   a.href=url; a.download=nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
-$("#gen").addEventListener("click",()=>{
-  const cli=$("#fCli").value.trim();
+// Cliente aprobado (no en modo admin): el pedido se confirma, se guarda en la base (reserva stock y numera la proforma) y se vacía el carrito.
+// El admin en modo Admin solo arma proformas, sin guardar.
+const confirmaEnBase=()=>!!(sb&&cuenta.cliente&&cuenta.cliente.estado==="aprobado"&&!cuenta.admin);
+const genTxt=()=>confirmaEnBase()?"✅ Confirmar pedido y bajar proforma":"📄 Generar proforma";
+const waTxt=(nro,cli,zona,fecha)=>{ const r=totales(); return `🧾 PEDIDO ROADSHOW · Proforma N° ${nro}\nCliente: ${cli}${zona?" ("+zona+")":""}\nFecha: ${fecha}\n\n`
+    +r.its.map(i=>`• ${i.q} x ${i.x.n} ${i.x.col} ${i.t} (${MODOS[i.m].corto})`).join("\n")
+    +`\n\n${uTxt(r.u)}\nTotal: ${fmt2(r.total)}${r.conIva?" (IVA incluido)":""}${r.tbc?"\n+ productos con precio a confirmar":""}`; };
+$("#gen").addEventListener("click",async()=>{
+  const cli=$("#fCli").value.trim(), b=$("#gen");
+  const mal=t=>{ b.disabled=false; b.className="big mal"; b.textContent="🔄 Reintentar"; setMsg(t,true); };
   if(!cli){ setMsg("Escribí el nombre del cliente.",true); $("#fCli").focus(); return; }
-  if(!window.jspdf||!window.jspdf.jsPDF){ $("#gen").className="big mal"; $("#gen").textContent="🔄 Reintentar"; setMsg("No se pudo armar el PDF: revisá la conexión a internet y reintentá.",true); return; }
+  if(!window.jspdf||!window.jspdf.jsPDF) return mal("No se pudo armar el PDF: revisá la conexión a internet y reintentá.");
+  const fecha=new Date().toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"});
+  const datos={nro:null,fecha,cli,zona:$("#fZona").value.trim(),env:$("#fEnv").value.trim(),pago:$("#fPago").value};
+  if(confirmaEnBase()){
+    const r=totales(), sinRef=r.its.filter(i=>!REF[i.x.id]);
+    if(sinRef.length) return mal("Hay productos sin precio en la lista ("+sinRef.map(i=>i.x.n+" "+i.x.col).join(", ")+"): sacalos del pedido o consultanos.");
+    const items=r.its.map(i=>{ const [modelo,color]=REF[i.x.id].split("|"); return {modelo,color,talle:String(i.t).split(" ")[0],cantidad:i.q,modo:i.m}; });
+    b.disabled=true; b.className="big bg-ac"; b.textContent="Confirmando…"; setMsg("");
+    try{ const {data,error}=await sb.rpc("crear_pedido",{items,datos:{envio:datos.env,pago:datos.pago,zona:datos.zona}}); if(error) throw error;
+      datos.nro=String((data&&data[0]||{}).numero).padStart(5,"0"); }
+    catch(e){ return mal("No se pudo confirmar el pedido: "+traducir(e.message||String(e)).replace(/\.$/,"")+". Tu pedido sigue acá, reintentá."); }
+  } else datos.nro=nroProforma();
   try{
-    const datos={nro:nroProforma(),fecha:new Date().toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"}),
-      cli,zona:$("#fZona").value.trim(),env:$("#fEnv").value.trim(),pago:$("#fPago").value};
     const doc=proformaPDF(datos);
     descargar(doc.output("blob"),`Proforma_${datos.nro}.pdf`);
-    ultimo=datos; $("#wa").hidden=false;
-    $("#gen").className="big bg-ac"; $("#gen").textContent="📄 Generar de nuevo";
-    setMsg(`✅ Proforma N° ${datos.nro} descargada.`);
-  }catch(e){ $("#gen").className="big mal"; $("#gen").textContent="🔄 Reintentar"; setMsg("No se pudo generar la proforma: "+(e&&e.message||e),true); }
+    ultimo={...datos,txt:waTxt(datos.nro,cli,datos.zona,fecha)}; $("#wa").hidden=false; b.disabled=false;
+    if(confirmaEnBase()){
+      Object.keys(pedido).forEach(k=>delete pedido[k]); render();
+      b.className="big bg-ac"; b.textContent="✅ Pedido confirmado"; b.disabled=true;
+      setMsg(`✅ Pedido N° ${datos.nro} confirmado y guardado. Ya te bajó la proforma. Lo ves en "Mi cuenta".`);
+      if(cuenta.cliente) cargarHistorial(cuenta.cliente.id);
+    } else { b.className="big bg-ac"; b.textContent="📄 Generar de nuevo"; setMsg(`✅ Proforma N° ${datos.nro} descargada.`); }
+  }catch(e){ mal(confirmaEnBase()?`El pedido N° ${datos.nro} quedó guardado, pero no se pudo bajar la proforma: `+(e&&e.message||e):"No se pudo generar la proforma: "+(e&&e.message||e)); }
 });
 $("#wa").addEventListener("click",()=>{
-  if(!ultimo) return; const r=totales();
-  const txt=`🧾 PEDIDO ROADSHOW · Proforma N° ${ultimo.nro}\nCliente: ${ultimo.cli}${ultimo.zona?" ("+ultimo.zona+")":""}\nFecha: ${ultimo.fecha}\n\n`
-    +r.its.map(i=>`• ${i.q} x ${i.x.n} ${i.x.col} ${i.t} (${MODOS[i.m].corto})`).join("\n")
-    +`\n\n${uTxt(r.u)}\nTotal: ${fmt2(r.total)}${r.conIva?" (IVA incluido)":""}${r.tbc?"\n+ productos con precio a confirmar":""}`;
+  if(!ultimo) return; const txt=ultimo.txt;
   window.open(`https://wa.me/${WA}?text=${encodeURIComponent(txt)}`,"_blank","noopener");
 });
 
