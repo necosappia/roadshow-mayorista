@@ -177,3 +177,8 @@ Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al prove
 ### Paula: primera compra corregida (07/10)
 - La primera compra de Paula es la **proforma 00020** (10/09, 20 pares, $ 4.499.566,50, pagada 11/09 por MP). El pedido #4 ("Depo BA", 18 pares, proforma-00021-depo-ba.pdf) estaba mal: quedó **cancelado**.
 - Impo 1 con esto: 153 FF + 20 Paula + 5 Tucumán + 8 FF (04 y 06/10) + 14 en stock = **200** → sobran 2 para 198 (¿el RS600 y el RX6D de Tucumán?). Pendiente de Nico.
+
+### Cuenta corriente y regalos de Fly Free (07/10)
+- Solapa **🧾 Cuenta corriente** en el panel: por cliente, compró / pagó / debe (solo pedidos confirmados, preparados o entregados) y la lista de pedidos con saldo.
+- Regalos de Fly Free: 6 pares (Valen, Fruti, Choy, Sorteo, Martu, Melli Nico) a mitad del costo de abril = $ 331.250 a cargo de Fly Free; la otra mitad la pone Sobre Ruedas (queda restada en la ganancia bruta). Karen y Yine no van. Impo 1 = 198.
+- Deuda de Fly Free hoy: $ 7.300.340 (153 pares $ 6.067.090 + 04/10 $ 833.500 + 06/10 $ 399.750). Tucumán $ 778.135 (lo cobró Nico).
