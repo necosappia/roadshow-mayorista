@@ -146,7 +146,7 @@ Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al prove
 
 **Datos que tiene que pasar Nico:**
 1. ✅ **Cargado (06/10):** el detalle de los **153 pares** de Fly Free (`docs/datos/ff-153-pares.csv`) como **una sola venta** a PISAPPCO SRL (perfil Fly Free), $ 21.373.680, estado entregada. RX6D = Negro; RSK 28-32 = S y 32-35 = M; RSJ Mora = Violeta; año 2026. 8 pares sin cargo. No movió stock (falta cargar el primer pedido).
-2. El **aporte de capital** (~22M): monto, fecha y quiénes.
+2. ✅ **Importación 04/2026:** 198 rollers, **USD 15.654**. Inversores: **Pablo USD 6.900 · Nico USD 5.855 · Martu USD 2.500** (= 15.255; faltan **USD 399** sin asignar). Falta: día exacto y dólar de abril. SQL: `docs/supabase/16_importacion_04_2026_inversores.sql`. Validado: 181 vendidos + 17 en stock (conteo 06/10) = 198.
 3. El **pedido del 17/09 por 17.015.100**: ¿pagado o pendiente? ¿Los USD 4.256 fueron para ese pedido?
 4. **Neuquén 4.499.566,50:** ¿seña de la proforma 00021?
 5. Cuál es el **stock real** (punto 3.6) y los **nombres de colores** (punto 4).
