@@ -934,7 +934,7 @@ async function cargarCuenta(user){
 function pintarTodo(){
   const e=cuenta.estado, n=cuenta.pend||0;
   $("#acc").innerHTML=e==="fuera"?`<button type="button" id="bIng">Ingresar</button><button type="button" class="pri" id="bReg">Registrarse</button>`
-    :(cuenta.doble?`<button type="button" class="modo" id="bModo" title="Cambiar entre administrador y cliente">${cuenta.comoCliente?"👤 Cliente":"👑 Admin"}<small>cambiar</small></button>`:"")+`<button type="button" id="bIng">👤 Mi cuenta${cuenta.admin&&n?`<em>${n}</em>`:""}</button>`;
+    :(cuenta.doble?`<button type="button" class="modo" id="bModo" title="Cambiar entre administrador y cliente">${cuenta.comoCliente?"👤 Cliente":"👑 Admin"}<small>${cuenta.comoCliente?"pasar a admin":"ver como cliente"}</small></button>`:"")+`<button type="button" id="bIng">👤 Mi cuenta${cuenta.admin&&n?`<em>${n}</em>`:""}</button>`;
   if($("#bModo")) $("#bModo").onclick=()=>{ try{ localStorage.setItem("modoVista",cuenta.comoCliente?"admin":"cliente"); }catch(e){} cargarCuenta(cuenta.user); };
   $("#bIng").onclick=()=>abrirSheet(cuenta.estado==="fuera"?"ingS":"ctaS");
   if($("#bReg")) $("#bReg").onclick=()=>abrirSheet("regS");
