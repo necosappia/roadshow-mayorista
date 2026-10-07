@@ -1,4 +1,3 @@
--- PENDIENTE: todavía NO se aplicó en la base (Nico tiene que confirmar).
 -- Conteo de stock del 06/10/2026 que pasó Nico (17 pares): SR Palermo 6, Fly Free Palermo 8, La Plata 3.
 -- PINK = Rosa, PURPLE = Violeta, BLUE = Azul · RSJ 36 = L, 32 = M.
 do $$
