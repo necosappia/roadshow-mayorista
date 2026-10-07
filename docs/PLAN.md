@@ -168,3 +168,8 @@ Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al prove
 4. Página: registro de clientes, precios por solapa y pedido → cuenta corriente.
    - ✅ **Hecho en la rama (06/10), falta publicar:** Registrarse / Ingresar arriba, precios solo con cuenta aprobada (BA en ⚡, China en 🚚/📦, FF para Fly Free sin sumar IVA) desde `mis_precios()`, y el admin aprueba clientes desde "Mi cuenta". Los precios ya no están escritos en `index.html`.
    - Falta: el pedido como orden en la base (hoy sigue siendo proforma PDF en el navegador), "olvidé mi contraseña", y volver a prender la confirmación por mail.
+
+### Fly Free: ventas del 06/10 y pagos (07/10)
+- Venta 06/10: RSK S x1 + RSK M x2 = $ 399.750 (sale de FF Palermo). Impo 1: 184 vendidos + 14 en stock = 198.
+- Pagos de los 153 pares cargados del Excel: $ 15.637.840. Fly Free debe en total **$ 6.969.090** (153 pares $ 5.735.840 + 04/10 $ 833.500 + 06/10 $ 399.750).
+- **Pendiente de preguntar:** el $ 331.250 del 06/09 ("mitad de costo de 6 rollers"): ¿qué 6 rollers son? No está cargado.
