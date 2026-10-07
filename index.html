@@ -802,7 +802,7 @@ function pintarTodo(){
 function pintarCuenta(){
   const c=cuenta.cliente, e=cuenta.estado;
   $("#ctaB").innerHTML=`<div class="box"><div class="li"><span>Mail</span><b>${esc(cuenta.user?.email)}</b></div>
-    ${c?`<div class="li"><span>Comercio</span><b>${esc(c.razon_social)}</b></div>
+    ${c?`<div class="li"><span>Comercio</span><b>${esc(c.nombre||c.razon_social)}</b></div>
     <div class="li"><span>Estado</span><span class="pill ${esc(c.estado)}">${c.estado==="aprobado"?"Aprobada":c.estado==="rechazado"?"No aprobada":"Pendiente de aprobación"}</span></div>
     ${c.estado==="aprobado"?`<div class="li"><span>Lista de precios</span><b>${perfilDe(c.categoria)}</b></div>`:""}`:""}
     ${c?`<div class="li"><span>Tus compras</span><b id="hist">Cargando…</b></div>`:""}
@@ -831,7 +831,7 @@ function pintarClientes(){
   const l=cuenta.clis, box=$("#clis"); if(!box) return;
   const orden={pendiente:0,aprobado:1,rechazado:2};
   box.innerHTML=!l.length?"Todavía no se registró nadie.":[...l].sort((a,b)=>orden[a.estado]-orden[b.estado]).map(c=>`<div class="cli">
-    <div><b>${esc(c.razon_social)}</b> <span class="pill ${esc(c.estado)}">${esc(c.estado)}${c.estado==="aprobado"?" · "+perfilDe(c.categoria):""}</span></div>
+    <div><b>${esc(c.nombre||c.razon_social)}</b> <span class="pill ${esc(c.estado)}">${esc(c.estado)}${c.estado==="aprobado"?" · "+perfilDe(c.categoria):""}</span></div>
     <span style="color:var(--soft);font-size:14px">${esc([c.email,c.cuit,c.telefono,c.zona,c.direccion].filter(Boolean).join(" · "))}</span>
     <div class="acts"><select data-cat="${c.id}" aria-label="Lista de precios">${Object.entries(PERFIL).map(([k,v])=>`<option value="${k}"${(c.categoria||"mayorista")===k?" selected":""}>${v}</option>`).join("")}</select>
       <button type="button" data-ap="${c.id}">${c.estado==="aprobado"?"Guardar lista":"Aprobar"}</button>${c.estado!=="rechazado"?`<button type="button" class="no" data-re="${c.id}">Rechazar</button>`:""}</div>
