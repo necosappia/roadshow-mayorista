@@ -132,6 +132,11 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
 .bar .t{flex:1;line-height:1.1}
 .bar .t span{font-size:14px;color:#B9B9C0;display:block}
 .bar .t strong{font-size:26px;font-weight:900;font-stretch:75%;white-space:nowrap}
+.bar .vres{background:transparent;color:#fff;border:1.5px solid #fff;border-radius:14px;padding:0 14px;height:52px;font-weight:900;font-size:15px;cursor:pointer;white-space:nowrap}
+@media (max-width:560px){.bar .vres{font-size:0;padding:0 14px}.bar .vres::before{content:"🧾";font-size:22px}}
+.big.vaciar{background:transparent;color:#E53935;border:1.5px solid #E53935;margin-top:10px}.big.sec{background:transparent;border:1.5px solid var(--line);color:inherit;margin-top:10px}
+.quitar{margin-left:10px;width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:transparent;color:#E53935;font-weight:900;cursor:pointer}
+.rr{display:flex;align-items:center;white-space:nowrap}
 .bar .t strong.chico{font-size:20px;white-space:normal}
 .bar button{height:56px;border:0;border-radius:14px;background:var(--rs);color:#fff;font-weight:900;font-size:17px;padding:0 22px;cursor:pointer}
 .bar button:disabled{background:#3A3A40;color:#8A8A92;cursor:not-allowed}
@@ -274,6 +279,7 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
 
 <div class="bar"><div class="wrap">
   <div class="t"><span id="barQ">0 unidades</span><strong id="barT">$ 0</strong><em id="barW"></em></div>
+  <button id="verRes" class="vres" hidden>🧾 Ver lo que llevás</button>
   <button id="go" disabled>📄 Hacer pedido</button>
 </div></div>
 
@@ -290,8 +296,21 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
       <label>Pago<select id="fPago"><option>Transferencia</option><option>Efectivo</option></select></label>
     </div>
     <button class="big bg-ac" id="gen">📄 Generar proforma</button>
+    <button class="big vaciar" type="button" data-vaciar>🗑️ Cancelar pedido</button>
     <button class="big bg-wa" id="wa" hidden>💬 Mandar pedido por WhatsApp</button>
     <p class="msg" id="msg"></p>
+  </div>
+</div>
+
+<div class="sheet" id="resS" role="dialog" aria-modal="true" aria-labelledby="resT">
+  <div class="panel">
+    <button class="x" data-cerrar aria-label="Cerrar">×</button>
+    <h3 id="resT">Lo que llevás</h3>
+    <p class="sub">Podés sacar algo con ✕ y seguir eligiendo.</p>
+    <div class="box" id="resL"></div>
+    <button class="big bg-ac" id="resGo">📄 Hacer pedido</button>
+    <button class="big sec" type="button" data-cerrar>Seguir eligiendo</button>
+    <button class="big vaciar" type="button" data-vaciar>🗑️ Cancelar pedido</button>
   </div>
 </div>
 
@@ -564,6 +583,8 @@ function render(){
 }
 function renderBar(){
   const r=totales();
+  $("#verRes").hidden=!r.u;
+  if($("#resS").classList.contains("show")) pintarRes();
   const inc=incompletas(), e=cuenta.estado;
   $("#barT").classList.toggle("chico",!verPrecios());
   if(verPrecios()){ $("#barQ").textContent=uTxt(r.u)+(r.sub&&r.conIva?" · + IVA":""); $("#barT").textContent=fmt(r.sub);
@@ -621,6 +642,22 @@ function abrir(){
   if(cuenta.cliente){ if(!$("#fCli").value) $("#fCli").value=cuenta.cliente.razon_social||""; if(!$("#fZona").value) $("#fZona").value=cuenta.cliente.zona||""; }
   $("#sheet").classList.add("show");
 }
+// Resumen de lo que lleva mientras elige: lista por modelo y talle, sacar de a uno y total
+function pintarRes(){
+  const r=totales();
+  if(!r.u){ $("#resS").classList.remove("show"); return; }
+  $("#resL").innerHTML=r.its.map(i=>`<div class="li"><span><span class="q">${i.q}</span> ${esc(i.x.n)} ${esc(i.x.col)} · ${esc(i.t)} <span class="mtag" style="--mc:${MODOS[i.m].c}">${MODOS[i.m].i} ${MODOS[i.m].corto}</span></span>
+      <span class="rr">${verPrecios()&&i.p?fmt(i.q*i.p):""}<button type="button" class="quitar" data-quitar="${esc(i.m+"|"+i.x.id+"|"+i.t)}" aria-label="Sacar ${esc(i.x.n)} ${esc(i.t)}">✕</button></span></div>`).join("")
+    +`<div style="margin-top:8px"><div class="tot"><span>Total de unidades</span><b>${r.u}</b></div>
+      ${verPrecios()?`<div class="tot g"><span>${r.conIva?"Subtotal + IVA":"TOTAL"}</span><span>${fmt2(r.conIva?r.sub:r.total)}</span></div>`:""}</div>`;
+  $("#resGo").disabled=$("#go").disabled; $("#resGo").textContent=$("#go").textContent;
+}
+$("#verRes").addEventListener("click",()=>{ pintarRes(); $("#resS").classList.add("show"); });
+$("#resGo").addEventListener("click",()=>{ $("#resS").classList.remove("show"); $("#go").click(); });
+$("#resL").addEventListener("click",e=>{ const b=e.target.closest("[data-quitar]"); if(!b) return; delete pedido[b.dataset.quitar]; render(); pintarRes(); });
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-vaciar]"); if(!b) return;
+  if(!confirm("¿Cancelar el pedido? Se borra todo lo que elegiste.")) return;
+  Object.keys(pedido).forEach(k=>delete pedido[k]); $("#resS").classList.remove("show"); $("#sheet").classList.remove("show"); render(); });
 function setMsg(t,mal){ $("#msg").textContent=t; $("#msg").className="msg"+(mal?" mal":""); }
 $("#go").addEventListener("click",()=>verPrecios()?abrir():abrirSheet(cuenta.estado==="fuera"||cuenta.estado==="error"?"regS":"ctaS"));
 $("#close").addEventListener("click",()=>$("#sheet").classList.remove("show"));
@@ -712,6 +749,13 @@ $("#wa").addEventListener("click",()=>{
 const usuario=v=>{ v=v.trim().toLowerCase(); return v.includes("@")?v:v+"@universosobreruedas.com"; };
 const SB_URL="https://tqmqlvlbfkjekxwccsty.supabase.co", SB_KEY="sb_publishable_UdVpZD6Xem9M1wADl-X5JA_TyZkkx_q";
 let sb=null; try{ sb=window.supabase.createClient(SB_URL,SB_KEY); }catch(e){ sb=null; }
+// Lo disponible de 🚚 Llega 28/10 sale de la base (importado − lo reservado por pedidos). Si no se puede leer, quedan los números de RS.
+if(sb) sb.rpc("stock_via").then(({data,error})=>{ if(error||!data) return;
+  const q={}; data.forEach(r=>q[r.modelo+"|"+r.color+"|"+(r.talle||"")]=r.libres);
+  RS.forEach(x=>{ if(!x.via||!REF[x.id]) return; const via={};
+    (x.tl||Object.keys(x.via)).forEach(t=>{ const k=REF[x.id]+"|"+String(t).split(" ")[0]; if(k in q) via[t]=q[k]; else if(x.via[t]!=null) via[t]=0; });
+    x.via=via; });
+  render(); });
 const traducir=m=>({"Invalid login credentials":"Mail o contraseña incorrectos.",
   "Email not confirmed":"Todavía no confirmaste tu mail. Buscá el mail de confirmación (mirá también en Spam).",
   "User already registered":"Ese mail ya está registrado. Tocá «Ingresar».",
