@@ -206,6 +206,7 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
 .acc{margin-left:auto;display:flex;gap:8px;flex:0 0 auto}
 .acc button{height:42px;border-radius:12px;padding:0 14px;font-weight:900;font-size:15px;cursor:pointer;border:1.5px solid #fff;background:transparent;color:#fff;white-space:nowrap;position:relative}
 .acc button.pri{background:var(--rs);border-color:var(--rs)}
+.acc button.modo{display:flex;flex-direction:column;justify-content:center;line-height:1.05;border-color:#FFB020;color:#FFB020}.acc button.modo small{font-size:10px;font-weight:800;opacity:.85;text-transform:uppercase;letter-spacing:.06em}
 .acc button em{position:absolute;top:-8px;right:-8px;font-style:normal;background:#FFB020;color:#111;border-radius:999px;min-width:22px;height:22px;font-size:12px;display:flex;align-items:center;justify-content:center;padding:0 5px}
 @media (max-width:560px){.top .r{display:none}.top img{width:44px;height:44px}.top .s{font-size:20px}.acc button{height:38px;padding:0 10px;font-size:14px}.top .wrap{gap:10px}}
 @media (max-width:380px){.top .u,.top .s{display:none}}
@@ -766,12 +767,15 @@ $("#bSalir").addEventListener("click",async()=>{
 async function cargarCuenta(user){
   cuenta={estado:"cargando",user}; pintarTodo();
   try{
-    const [cli,adm,pr]=await Promise.all([
+    const [cli,adm]=await Promise.all([
       sb.from("clientes").select("*").eq("user_id",user.id).maybeSingle(),
-      sb.from("admins").select("user_id").eq("user_id",user.id),
-      sb.rpc("precios_cliente")]);
-    const err=cli.error||adm.error||pr.error; if(err) throw err;
-    const admin=adm.data.length>0, c=cli.data;
+      sb.from("admins").select("user_id").eq("user_id",user.id)]);
+    const err=cli.error||adm.error; if(err) throw err;
+    // Botón Admin / Cliente: si el admin también es un cliente aprobado, puede ver la página como ese cliente
+    const esAdmin=adm.data.length>0, c=cli.data, doble=esAdmin&&c&&c.estado==="aprobado"&&!!c.categoria;
+    let modo="admin"; try{ modo=localStorage.getItem("modoVista")||"admin"; }catch(e){}
+    const comoCliente=doble&&modo==="cliente", admin=esAdmin&&!comoCliente;
+    const pr=admin?await sb.rpc("precios_como",{perfil_ver:"mayorista"}):await sb.rpc("precios_cliente"); if(pr.error) throw pr.error;
     const lista={}; (pr.data||[]).forEach(r=>{ (lista[r.modelo+"|"+r.color]=lista[r.modelo+"|"+r.color]||[]).push(r); });
     PRECIOS={}; for(const [id,ref] of Object.entries(REF)){ const rs=lista[ref]; if(!rs||!rs.length) continue;
       // un precio por producto: el que tiene la mayoría de los talles
@@ -780,7 +784,7 @@ async function cargarCuenta(user){
       PRECIOS[id]={ya:g[0],via:g[1],enc:g[2],pub:g[3]||0,pubIva:g[4]||0}; }
     const estado=Object.keys(PRECIOS).length?"aprobado":c?c.estado==="rechazado"?"rechazado":c.estado==="aprobado"?"aprobado":"pendiente":admin?"aprobado":"pendiente";
     const perfil=(pr.data||[])[0]?.perfil;
-    cuenta={estado,user,admin,cliente:c,categoria:perfil||(c&&c.estado==="aprobado"?c.categoria:"mayorista")};
+    cuenta={estado,user,admin,doble,comoCliente,cliente:c,categoria:perfil||(c&&c.estado==="aprobado"?c.categoria:"mayorista")};
   }catch(e){ PRECIOS={}; cuenta={estado:"error",user,error:traducir(e.message||String(e))}; }
   pintarTodo();
   if(cuenta.admin) cargarClientes();
@@ -788,7 +792,8 @@ async function cargarCuenta(user){
 function pintarTodo(){
   const e=cuenta.estado, n=cuenta.pend||0;
   $("#acc").innerHTML=e==="fuera"?`<button type="button" id="bIng">Ingresar</button><button type="button" class="pri" id="bReg">Registrarse</button>`
-    :`<button type="button" id="bIng">👤 Mi cuenta${cuenta.admin&&n?`<em>${n}</em>`:""}</button>`;
+    :(cuenta.doble?`<button type="button" class="modo" id="bModo" title="Cambiar entre administrador y cliente">${cuenta.comoCliente?"👤 Cliente":"👑 Admin"}<small>cambiar</small></button>`:"")+`<button type="button" id="bIng">👤 Mi cuenta${cuenta.admin&&n?`<em>${n}</em>`:""}</button>`;
+  if($("#bModo")) $("#bModo").onclick=()=>{ try{ localStorage.setItem("modoVista",cuenta.comoCliente?"admin":"cliente"); }catch(e){} cargarCuenta(cuenta.user); };
   $("#bIng").onclick=()=>abrirSheet(cuenta.estado==="fuera"?"ingS":"ctaS");
   if($("#bReg")) $("#bReg").onclick=()=>abrirSheet("regS");
   const av=$("#aviso"), t=$("#avisoT"); av.className="aviso";
