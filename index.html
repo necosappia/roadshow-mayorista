@@ -98,6 +98,13 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
 .vbtn:hover,.vbtn:focus-visible{background:#FF7A1A;color:#111;border-color:#FF7A1A;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.18)}
 .vbtn:hover b{color:#111}
 .vbtn b{color:#FF7A1A}
+/* misma altura en todas las tarjetas: las que no tienen video reservan el lugar del botón */
+.extras.vacio{visibility:hidden}
+.edad{min-height:26px}
+.nrow{min-height:36px}
+.nost .ir{display:grid!important;grid-template-columns:1fr}
+.nost .ir button{text-align:left;width:100%}
+.nost.elegir{flex:1 0 auto;margin-top:12px}
 .vid .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:76px;height:76px;border-radius:50%;background:var(--y);color:#111;font-size:30px;display:flex;align-items:center;justify-content:center;padding-left:5px}
 .prod{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;display:flex;flex-direction:column}
 .prod.on{border-color:var(--ok);box-shadow:0 0 0 2px var(--ok)}
@@ -543,7 +550,7 @@ function card(x){
     <div class="body">
       <div><div class="nrow"><h2 class="name">${esc(x.n)}</h2>${x.info?`<button class="ibtn" data-info="${x.info}">ⓘ Info</button>`:""}</div><p class="col"><span class="dot" style="--d:${x.dot}"></span>${esc(x.col)}</p>
         <div class="edad">${edadDe(x).map(e=>`<span>${e}</span>`).join("")}</div></div>
-      ${VIDEOS.some(v=>v.m===x.id)?`<div class="extras">${VIDEOS.filter(v=>v.m===x.id).map(v=>`<a class="vbtn" href="${ytLink(v)}" target="_blank" rel="noopener"><b>▶</b> ${esc(v.n||"Ver video")}</a>`).join("")}</div>`:""}
+      ${VIDEOS.some(v=>v.m===x.id)?`<div class="extras">${VIDEOS.filter(v=>v.m===x.id).map(v=>`<a class="vbtn" href="${ytLink(v)}" target="_blank" rel="noopener"><b>▶</b> ${esc(v.n||"Ver video")}</a>`).join("")}</div>`:`<div class="extras vacio" aria-hidden="true"><span class="vbtn">&nbsp;</span></div>`}
       ${precioHTML(x,m)}
       ${m==="enc"&&(x.caja||x.fab)?`<div class="cajab${faltan(x)?" falta":enCaja(x)?" ok":""}">
         ${x.caja?`<b>📦 Caja de ${x.caja} pares del mismo talle</b><span>${!enCaja(x)?"Cada + suma una caja":faltan(x)?`${faltan(x)===1?"Falta 1":"Faltan "+faltan(x)} para cerrar las cajas`:`✓ ${enCaja(x)/x.caja===1?"1 caja":enCaja(x)/x.caja+" cajas"} · ${enCaja(x)} pares`}</span>`:""}
