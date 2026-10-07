@@ -143,6 +143,10 @@ a.vid.prodv img{object-fit:contain;opacity:.55}
 @media (max-width:560px){.bar .vres{font-size:0;padding:0 14px}.bar .vres::before{content:"🧾";font-size:22px}}
 .big.vaciar{background:transparent;color:#E53935;border:1.5px solid #E53935;margin-top:10px}.big.sec{background:transparent;border:1.5px solid var(--line);color:inherit;margin-top:10px}
 .quitar{margin-left:10px;width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:transparent;color:#E53935;font-weight:900;cursor:pointer}
+.mped{border:1px solid var(--line);border-radius:14px;margin-top:8px;background:var(--card);overflow:hidden}.mped.nuevo{border-color:var(--ok);box-shadow:0 0 0 2px var(--ok)}
+.mped summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:10px;padding:12px 14px}.mped summary::-webkit-details-marker{display:none}
+.mped summary span{display:flex;flex-direction:column;min-width:0}.mped summary small{color:var(--soft);font-size:13px;font-weight:700}.mped .mt{text-align:right;align-items:flex-end;white-space:nowrap}
+.mped .mt small.debe{color:#E8590C}.mped .mt small.ok{color:var(--ok)}.mped .li{padding:8px 14px;border-top:1px solid var(--line)}.mped .li>span:last-child{white-space:nowrap;padding-left:10px}
 .rr{display:flex;align-items:center;white-space:nowrap}
 .bar .t strong.chico{font-size:20px;white-space:normal}
 .bar button{height:56px;border:0;border-radius:14px;background:var(--rs);color:#fff;font-weight:900;font-size:17px;padding:0 22px;cursor:pointer}
@@ -742,14 +746,14 @@ $("#gen").addEventListener("click",async()=>{
   if(!cli){ setMsg("Escribí el nombre del cliente.",true); $("#fCli").focus(); return; }
   if(!window.jspdf||!window.jspdf.jsPDF) return mal("No se pudo armar el PDF: revisá la conexión a internet y reintentá.");
   const fecha=new Date().toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"});
-  const datos={nro:null,fecha,cli,zona:$("#fZona").value.trim(),env:$("#fEnv").value.trim(),pago:$("#fPago").value};
+  let pedidoId=null; const datos={nro:null,fecha,cli,zona:$("#fZona").value.trim(),env:$("#fEnv").value.trim(),pago:$("#fPago").value};
   if(confirmaEnBase()){
     const r=totales(), sinRef=r.its.filter(i=>!REF[i.x.id]);
     if(sinRef.length) return mal("Hay productos sin precio en la lista ("+sinRef.map(i=>i.x.n+" "+i.x.col).join(", ")+"): sacalos del pedido o consultanos.");
     const items=r.its.map(i=>{ const [modelo,color]=REF[i.x.id].split("|"); return {modelo,color,talle:String(i.t).split(" ")[0],cantidad:i.q,modo:i.m}; });
     b.disabled=true; b.className="big bg-ac"; b.textContent="Confirmando…"; setMsg("");
     try{ const {data,error}=await sb.rpc("crear_pedido",{items,datos:{envio:datos.env,pago:datos.pago,zona:datos.zona}}); if(error) throw error;
-      datos.nro=String((data&&data[0]||{}).numero).padStart(5,"0"); }
+      datos.nro=String((data&&data[0]||{}).numero).padStart(5,"0"); pedidoId=(data&&data[0]||{}).id; }
     catch(e){ return mal("No se pudo confirmar el pedido: "+traducir(e.message||String(e)).replace(/\.$/,"")+". Tu pedido sigue acá, reintentá."); }
   } else datos.nro=nroProforma();
   try{
@@ -758,9 +762,9 @@ $("#gen").addEventListener("click",async()=>{
     ultimo={...datos,txt:waTxt(datos.nro,cli,datos.zona,fecha)}; $("#wa").hidden=false; b.disabled=false;
     if(confirmaEnBase()){
       Object.keys(pedido).forEach(k=>delete pedido[k]); render();
-      b.className="big bg-ac"; b.textContent="✅ Pedido confirmado"; b.disabled=true;
-      setMsg(`✅ Pedido N° ${datos.nro} confirmado y guardado. Ya te bajó la proforma. Lo ves en "Mi cuenta".`);
-      if(cuenta.cliente) cargarHistorial(cuenta.cliente.id);
+      b.className="big bg-ac"; b.textContent="✅ Pedido confirmado"; b.disabled=true; setMsg("");
+      nuevoPed=pedidoId; abrirSheet("ctaS");   // sale de donde armaba el pedido y lo lleva a "Mi cuenta" con el pedido nuevo abierto
+      const av=$("#aviso"), t=$("#avisoT"); av.hidden=false; av.className="aviso"; t.textContent=`✅ Pedido N° ${datos.nro} confirmado. Ya te bajó la proforma.`;
     } else { b.className="big bg-ac"; b.textContent="📄 Generar de nuevo"; setMsg(`✅ Proforma N° ${datos.nro} descargada.`); }
   }catch(e){ mal(confirmaEnBase()?`El pedido N° ${datos.nro} quedó guardado, pero no se pudo bajar la proforma: `+(e&&e.message||e):"No se pudo generar la proforma: "+(e&&e.message||e)); }
 });
@@ -881,19 +885,35 @@ function pintarCuenta(){
     ${c.estado==="aprobado"?`<div class="li"><span>Lista de precios</span><b>${perfilDe(c.categoria)}</b></div>`:""}`:""}
     ${c?`<div class="li"><span>Tus compras</span><b id="hist">Cargando…</b></div>`:""}
     ${cuenta.admin?`<div class="li"><span>Rol</span><b>Administrador</b></div>`:""}</div>
-    ${e==="error"?errHTML("No se pudieron cargar tus datos: "+cuenta.error,true):""}`;
+    ${e==="error"?errHTML("No se pudieron cargar tus datos: "+cuenta.error,true):""}
+    ${c?`<h3 style="font-size:24px;margin-top:14px">Mis pedidos</h3><div id="misPed"><p class="sub">Cargando…</p></div>`:""}`;
   const r=$("#ctaB").querySelector("[data-reint]"); if(r) r.onclick=()=>cargarCuenta(cuenta.user);
   if(c) cargarHistorial(c.id);
   $("#admB").innerHTML=cuenta.admin?`<a class="big bg-ac" href="admin/" style="display:flex;align-items:center;justify-content:center;text-decoration:none">🗂️ Abrir panel de administración</a><h3 style="font-size:24px;margin-top:14px">Clientes</h3><div class="box" id="clis">${cuenta.clis?"":"Cargando…"}</div>`:"";
   if(cuenta.admin&&cuenta.clis) pintarClientes();
 }
-/* Historial del cliente: pares comprados y $ invertidos (ventas no canceladas) */
+/* Historial del cliente: resumen (pares y $) y la lista de sus pedidos con el detalle */
+let nuevoPed=null;   // el pedido recién confirmado: se abre y se marca en "Mis pedidos"
+const ESTADO_CLI={nueva:"Recibido",a_confirmar:"A confirmar",confirmada:"Confirmado",preparada:"Preparado",entregada:"Entregado",cancelada:"Cancelado"};
+function nombreSku(sku){   // "M4PROM38/39" → M4 PRO Morado · 38/39 (con lo que ya sabe la página: REF y RS)
+  let mejor=null; for(const [id,ref] of Object.entries(REF)){ const pre=ref.replace("|",""); if(sku.startsWith(pre)&&(!mejor||pre.length>mejor.pre.length)) mejor={id,pre}; }
+  if(!mejor) return sku; const x=RS.find(y=>y.id===mejor.id), t=sku.slice(mejor.pre.length);
+  return `${x?x.n+" "+x.col:mejor.id}${t?" · "+t:""}`; }
 async function cargarHistorial(id){
-  const {data,error}=await sb.from("operaciones").select("total,operacion_items(cantidad)").eq("cliente_id",id).eq("tipo","venta").neq("estado","cancelada");
-  const el=$("#hist"); if(!el) return;
-  if(error){ el.innerHTML=`<span style="color:#C62828">No se pudo leer</span> <button type="button" class="link" id="histR">🔄 Reintentar</button>`; $("#histR").onclick=()=>cargarHistorial(id); return; }
-  const pares=data.reduce((a,o)=>a+(o.operacion_items||[]).reduce((b,i)=>b+i.cantidad,0),0), tot=data.reduce((a,o)=>a+(Number(o.total)||0),0);
-  el.textContent=data.length?`${pares} ${pares===1?"par":"pares"} · ${fmt(tot)}`:"Todavía no hay compras guardadas";
+  const {data,error}=await sb.from("operaciones").select("id,fecha,estado,numero_proforma,total,operacion_items(sku,cantidad,precio_unitario,modo),pagos(monto)").eq("cliente_id",id).eq("tipo","venta").order("fecha",{ascending:false}).order("id",{ascending:false});
+  const el=$("#hist"), lp=$("#misPed"); if(!el) return;
+  if(error){ el.innerHTML=`<span style="color:#C62828">No se pudo leer</span> <button type="button" class="link" id="histR">🔄 Reintentar</button>`; $("#histR").onclick=()=>cargarHistorial(id);
+    if(lp) lp.innerHTML=""; return; }
+  const ok=data.filter(o=>o.estado!=="cancelada");
+  const pares=ok.reduce((a,o)=>a+(o.operacion_items||[]).reduce((b,i)=>b+i.cantidad,0),0), tot=ok.reduce((a,o)=>a+(Number(o.total)||0),0);
+  el.textContent=ok.length?`${pares} ${pares===1?"par":"pares"} · ${fmt(tot)}`:"Todavía no hay compras guardadas";
+  if(!lp) return;
+  lp.innerHTML=ok.length?ok.map(o=>{ const its=o.operacion_items||[], n=its.reduce((a,i)=>a+i.cantidad,0), pag=(o.pagos||[]).reduce((a,p)=>a+Number(p.monto),0), debe=Math.max(0,Number(o.total)-pag);
+    const nro=o.numero_proforma?"Proforma "+String(o.numero_proforma).padStart(5,"0"):"Pedido #"+o.id;
+    return `<details class="mped${o.id===nuevoPed?" nuevo":""}"${o.id===nuevoPed?" open":""}><summary><span><b>${o.id===nuevoPed?"🆕 ":""}${nro}</b><small>${new Date(o.fecha+"T12:00").toLocaleDateString("es-AR")} · ${n} ${n===1?"par":"pares"} · ${ESTADO_CLI[o.estado]||o.estado}</small></span><span class="mt"><b>${fmt(o.total)}</b><small class="${debe>=1?"debe":"ok"}">${debe>=1?"Debe "+fmt(debe):"Pagado"}</small></span></summary>
+      ${its.map(i=>`<div class="li"><span><span class="q">${i.cantidad}</span> ${esc(nombreSku(i.sku))}${i.modo&&MODOS[i.modo]?` <span class="mtag" style="--mc:${MODOS[i.modo].c}">${MODOS[i.modo].i} ${MODOS[i.modo].corto}</span>`:""}</span><span>${fmt(i.cantidad*i.precio_unitario)}</span></div>`).join("")}</details>`; }).join("")
+    :`<p class="sub">Todavía no hiciste pedidos.</p>`;
+  const nv=lp.querySelector(".mped.nuevo"); if(nv) setTimeout(()=>nv.scrollIntoView({block:"nearest",behavior:"smooth"}),100);
 }
 /* Admin: aprobar clientes y elegir su lista */
 async function cargarClientes(){
