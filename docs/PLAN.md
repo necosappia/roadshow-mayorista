@@ -173,3 +173,7 @@ Nico vio una maqueta (06/10) con: 4 números arriba (Te deben · Debés al prove
 - Venta 06/10: RSK S x1 + RSK M x2 = $ 399.750 (sale de FF Palermo). Impo 1: 184 vendidos + 14 en stock = 198.
 - Pagos de los 153 pares cargados del Excel: $ 15.637.840. Fly Free debe en total **$ 6.969.090** (153 pares $ 5.735.840 + 04/10 $ 833.500 + 06/10 $ 399.750).
 - **Pendiente de preguntar:** el $ 331.250 del 06/09 ("mitad de costo de 6 rollers"): ¿qué 6 rollers son? No está cargado.
+
+### Paula: primera compra corregida (07/10)
+- La primera compra de Paula es la **proforma 00020** (10/09, 20 pares, $ 4.499.566,50, pagada 11/09 por MP). El pedido #4 ("Depo BA", 18 pares, proforma-00021-depo-ba.pdf) estaba mal: quedó **cancelado**.
+- Impo 1 con esto: 153 FF + 20 Paula + 5 Tucumán + 8 FF (04 y 06/10) + 14 en stock = **200** → sobran 2 para 198 (¿el RS600 y el RX6D de Tucumán?). Pendiente de Nico.
